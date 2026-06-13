@@ -33,7 +33,7 @@ class FormController extends Controller
 
     public function submit(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'jadwal_id' => 'required|exists:jadwals,id',
             'q1' => 'required|integer|min:1|max:5',
             'q2' => 'required|integer|min:1|max:5',
@@ -42,7 +42,7 @@ class FormController extends Controller
             'saran' => 'nullable|string'
         ]);
 
-        Evaluation::create($request->all());
+        Evaluation::create($validated);
 
         return redirect()->route('form.success')->with('success', 'Kuisioner berhasil disubmit. Terima kasih!');
     }

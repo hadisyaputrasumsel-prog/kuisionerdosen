@@ -113,6 +113,12 @@
                             </div>
                             
                             <div class="mb-4">
+                                <label class="form-label fw-bold">URL Target SIMAK (Advanced)</label>
+                                <input type="text" id="simak_url" name="simak_url" class="form-control" value="{{ env('SIMAK_BASE_URL', 'https://simak.uss.ac.id') }}" placeholder="https://simak.uss.ac.id">
+                                <small class="text-muted">Biarkan default kecuali Anda perlu *bypass* IP publik dari dalam server (misal: isi dengan `http://192.168.x.x` atau IP LAN server SIMAK).</small>
+                            </div>
+                            
+                            <div class="mb-4">
                                 <label class="form-label fw-bold">Pilih Periode Sinkronisasi</label>
                                 <div class="d-flex flex-wrap gap-2 mb-2">
                                     <input type="hidden" name="periode_label" id="periode_label" value="">
@@ -166,6 +172,7 @@ document.getElementById('btn-fetch-periods').addEventListener('click', function(
     let formData = new FormData();
     formData.append('simak_username', username);
     formData.append('simak_password', password);
+    formData.append('simak_url', document.getElementById('simak_url').value);
     formData.append('_token', '{{ csrf_token() }}');
     
     fetch('{{ route("admin.scrape.periods") }}', {

@@ -107,7 +107,8 @@ class AdminController extends Controller
         try {
             $cookieJar = new \GuzzleHttp\Cookie\CookieJar();
             
-            $baseUrl = env('SIMAK_BASE_URL', 'https://simak.uss.ac.id');
+            $baseUrl = $request->simak_url ?? env('SIMAK_BASE_URL', 'https://simak.uss.ac.id');
+            $baseUrl = rtrim($baseUrl, '/');
             
             // 1. Login
             $loginRes = \Illuminate\Support\Facades\Http::withOptions(['verify' => false, 'cookies' => $cookieJar])
@@ -173,7 +174,8 @@ class AdminController extends Controller
         try {
             $cookieJar = new \GuzzleHttp\Cookie\CookieJar();
             
-            $baseUrl = env('SIMAK_BASE_URL', 'https://simak.uss.ac.id');
+            $baseUrl = $request->simak_url ?? env('SIMAK_BASE_URL', 'https://simak.uss.ac.id');
+            $baseUrl = rtrim($baseUrl, '/');
             
             // 1. Login
             $loginRes = \Illuminate\Support\Facades\Http::withOptions(['verify' => false, 'cookies' => $cookieJar])

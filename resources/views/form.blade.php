@@ -16,8 +16,20 @@
     <div class="max-w-2xl mx-auto">
         <!-- Header -->
         <div class="bg-white rounded-lg shadow-md mb-6 p-6 form-header">
-            <h1 class="text-3xl font-semibold mb-2">Evaluasi Dosen & Mata Kuliah</h1>
-            <p class="text-gray-600">Silakan isi kuisioner berikut untuk menilai kinerja dosen dalam proses pembelajaran. Masukan Anda sangat berarti bagi peningkatan kualitas pendidikan.</p>
+            <h1 class="text-3xl font-semibold mb-2">Evaluasi Dosen dalam Mengajar Tahun Akademik 2025/2026 Genap</h1>
+            <div class="text-gray-600 leading-relaxed">
+                <p>Kuisioner ini merupakan instrumen pengukuran kinerja dosen dalam melakukan Tri Dharma Pendidikan berupa pendidikan/ pengajaran.</p>
+                <p>Isikan sesuai penilaian Anda terhadap setiap dosen dengan pilihan berikut :</p>
+                <table class="mt-2">
+                    <tbody>
+                        <tr><td class="pr-4">SB</td><td class="pr-4">= Sangat Baik</td><td>= 5</td></tr>
+                        <tr><td class="pr-4">B</td><td class="pr-4">= Baik</td><td>= 4</td></tr>
+                        <tr><td class="pr-4">C</td><td class="pr-4">= Cukup</td><td>= 3</td></tr>
+                        <tr><td class="pr-4">KB</td><td class="pr-4">= Kurang Baik</td><td>= 2</td></tr>
+                        <tr><td class="pr-4">SKB</td><td class="pr-4">= Sangat Kurang Baik</td><td>= 1</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <form action="{{ route('form.submit') }}" method="POST" id="kuisionerForm">
@@ -45,34 +57,70 @@
             <!-- Section 3: Kuisioner -->
             <div id="questions_section" class="hidden">
                 @php
-                    $questions = [
-                        ['id' => 'q1', 'title' => 'Kompetensi Pedagogik', 'desc' => 'Kemampuan dosen dalam merencanakan, melaksanakan, dan mengevaluasi pembelajaran.'],
-                        ['id' => 'q2', 'title' => 'Kompetensi Profesional', 'desc' => 'Penguasaan materi pembelajaran secara luas dan mendalam oleh dosen.'],
-                        ['id' => 'q3', 'title' => 'Kompetensi Kepribadian', 'desc' => 'Sikap dan perilaku dosen sebagai teladan yang baik bagi mahasiswa.'],
-                        ['id' => 'q4', 'title' => 'Kompetensi Sosial', 'desc' => 'Kemampuan dosen berkomunikasi dan bergaul dengan mahasiswa secara efektif.']
+                    $sections = [
+                        [
+                            'title' => 'A. PROSES BELAJAR MENGAJAR',
+                            'questions' => [
+                                ['id' => 'q1', 'title' => 'Rencana materi dalam bentuk Rencana Pembelajaran Semester (RPS) dan tujuan mata kuliah dijelaskan saat awal semester perkuliahan'],
+                                ['id' => 'q2', 'title' => 'Dosen datang tepat waktu dan mengajar sesuai jadwal perkuliahan, kecuali berhalangan/ ditugaskan (Surat Tugas diinformasikan)'],
+                                ['id' => 'q3', 'title' => 'Diadakan tanya jawab, diskusi dan pembahasan latihan soal dalam proses pembelajaran'],
+                                ['id' => 'q4', 'title' => 'Manfaat soal latihan atau studi kasus dalam menambah pemahanan mata kuliah ini'],
+                                ['id' => 'q5', 'title' => 'Kesesuain evaluasi (tugas, kuis, UTS dan UAS) dengan materi yang diajarkan'],
+                                ['id' => 'q6', 'title' => 'Pembahasan (integrasi) hasil Penelitian dan/ atau hasil Pengabdian kepada Masyarakat yang berhubungan dengan mata kuliah'],
+                                ['id' => 'q7', 'title' => 'Sistematika menjelaskan kuliah (dosen menerangkan dengan baik kriteria penilaian secara rasional dan sesuai dengan aturan yang berlaku saat perjanjian pra kuliah)'],
+                                ['id' => 'q8', 'title' => 'Latihan soal terhadap setiap materi yang diberikan'],
+                                ['id' => 'q9', 'title' => 'Kesesuaian materi dan/ atau praktikum yang diberikan terhadap bahan kuliah']
+                            ]
+                        ],
+                        [
+                            'title' => 'B. KAPABILITAS (KOMPETENSI DOSEN)',
+                            'questions' => [
+                                ['id' => 'q10', 'title' => 'Kemampuan dosen dalam menjelaskan materi perkuliahan'],
+                                ['id' => 'q11', 'title' => 'Penguasaan materi, wawasan, materi perkuliahan dan praktikum'],
+                                ['id' => 'q12', 'title' => 'Kemampuan dosen menjawab pertanyaan'],
+                                ['id' => 'q13', 'title' => 'Penggunaan media pembelajaran pendukung seperti video, quizizz, kahoot, mentimeter dll'],
+                                ['id' => 'q14', 'title' => 'Kemampuan dosen dalam memberikan motivasi/ membangkitkan minat belajar, menghidupkan suasana kelas dan mendorong mahasiswa untuk bersikap/ berperilaku serta berbudi pekerti luhur'],
+                                ['id' => 'q15', 'title' => 'Kemampuan dosen mendorong mahasiswa/i untuk melakukan riset dan berkarya sesuai dengan bidang keahliannya']
+                            ]
+                        ],
+                        [
+                            'title' => 'C. KETERSEDIAAN SARANA',
+                            'questions' => [
+                                ['id' => 'q16', 'title' => 'Bahan ajar (handout/ filet ppt/ canva) tersedia dengan baik dan dibagikan melalui SIMAK atau LMS'],
+                                ['id' => 'q17', 'title' => 'Buku referensi (textbook) diinformasikan dan tersedia']
+                            ]
+                        ]
                     ];
+                    $questionNumber = 1;
                 @endphp
 
-                @foreach($questions as $index => $q)
-                <div class="bg-white rounded-lg shadow-md mb-6 p-6">
-                    <label class="block text-lg font-medium text-gray-800 mb-2">{{ $index + 1 }}. {{ $q['title'] }} <span class="text-red-500">*</span></label>
-                    <p class="text-sm text-gray-500 mb-4">{{ $q['desc'] }}</p>
-                    
-                    <div class="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-6">
-                        <span class="text-sm text-gray-500 hidden sm:block">Sangat Kurang</span>
-                        @for($i = 1; $i <= 5; $i++)
-                            <label class="flex items-center space-x-2 cursor-pointer">
-                                <input type="radio" name="{{ $q['id'] }}" value="{{ $i }}" class="w-5 h-5 text-purple-600 focus:ring-purple-500 border-gray-300" required>
-                                <span class="sm:hidden text-gray-700">{{ $i }}</span>
-                            </label>
-                        @endfor
-                        <span class="text-sm text-gray-500 hidden sm:block">Sangat Baik</span>
+                @foreach($sections as $section)
+                    <div class="bg-indigo-50 rounded-t-lg shadow-sm mb-4 p-5 border border-indigo-100 border-t-4 border-t-indigo-500 mt-8 first:mt-0">
+                        <h2 class="text-xl font-semibold text-gray-800">{{ $section['title'] }}</h2>
                     </div>
-                    <div class="flex justify-between sm:hidden mt-2 px-1 text-xs text-gray-500">
-                        <span>Sangat Kurang (1)</span>
-                        <span>Sangat Baik (5)</span>
+
+                    @foreach($section['questions'] as $q)
+                    <div class="bg-white rounded-lg shadow-sm mb-6 p-6 border border-gray-200">
+                        <label class="block text-base font-medium text-gray-800 mb-6">{{ $questionNumber++ }}. {{ $q['title'] }} <span class="text-red-500">*</span></label>
+                        
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-center space-y-4 sm:space-y-0 sm:space-x-8">
+                            <span class="text-sm text-gray-600 hidden sm:block w-32 text-right">Sangat Kurang Baik</span>
+                            <div class="flex justify-between sm:justify-center w-full sm:w-auto space-x-0 sm:space-x-8 px-2 sm:px-0">
+                                @for($i = 1; $i <= 5; $i++)
+                                    <label class="flex flex-col items-center space-y-3 cursor-pointer">
+                                        <span class="text-gray-500 text-sm font-medium">{{ $i }}</span>
+                                        <input type="radio" name="{{ $q['id'] }}" value="{{ $i }}" class="w-5 h-5 text-indigo-600 focus:ring-indigo-500 border-gray-300" required>
+                                    </label>
+                                @endfor
+                            </div>
+                            <span class="text-sm text-gray-600 hidden sm:block w-32 text-left">Sangat Baik</span>
+                        </div>
+                        <div class="flex justify-between sm:hidden mt-6 px-1 text-sm text-gray-600">
+                            <span>Sangat Kurang Baik</span>
+                            <span>Sangat Baik</span>
+                        </div>
                     </div>
-                </div>
+                    @endforeach
                 @endforeach
 
                 <div class="bg-white rounded-lg shadow-md mb-6 p-6">

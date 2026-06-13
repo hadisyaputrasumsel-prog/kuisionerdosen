@@ -2,33 +2,85 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\Prodi;
+use App\Models\Dosen;
+use App\Models\MataKuliah;
+use App\Models\Jadwal;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        $prodi1 = \App\Models\Prodi::create(['name' => 'Ilmu Komunikasi']);
-        $prodi2 = \App\Models\Prodi::create(['name' => 'Manajemen']);
-        $prodi3 = \App\Models\Prodi::create(['name' => 'Ilmu Komputer']);
+        $csvFile = base_path('semua_jadwal_ruangan.csv');
+        
+        if (!file_exists($csvFile)) {
+            // Fallback ke dummy data jika CSV tidak ada
+            $prodi1 = Prodi::create(['name' => 'Ilmu Komunikasi']);
+            $prodi2 = Prodi::create(['name' => 'Manajemen']);
+            $prodi3 = Prodi::create(['name' => 'Ilmu Komputer']);
 
-        $dosen1 = \App\Models\Dosen::create(['name' => 'Dr. Hadi Syaputra, S.Kom., M.Kom.']);
-        $dosen2 = \App\Models\Dosen::create(['name' => 'Intan Putri, S.I.Kom,. M.I.Kom']);
-        $dosen3 = \App\Models\Dosen::create(['name' => 'Rikkie Dekas, S.E., M.M.']);
+            $dosen1 = Dosen::create(['name' => 'Dr. Hadi Syaputra, S.Kom., M.Kom.']);
+            $dosen2 = Dosen::create(['name' => 'Intan Putri, S.I.Kom,. M.I.Kom']);
+            $dosen3 = Dosen::create(['name' => 'Rikkie Dekas, S.E., M.M.']);
 
-        $mk1 = \App\Models\MataKuliah::create(['name' => 'PENGOLAHAN CITRA', 'code' => 'IKM244321']);
-        $mk2 = \App\Models\MataKuliah::create(['name' => 'KOMUNIKASI MASSA', 'code' => 'KOM101']);
-        $mk3 = \App\Models\MataKuliah::create(['name' => 'PENGANGGARAN PERUSAHAAN', 'code' => 'MAN201']);
+            $mk1 = MataKuliah::create(['name' => 'PENGOLAHAN CITRA', 'code' => 'IKM244321']);
+            $mk2 = MataKuliah::create(['name' => 'KOMUNIKASI MASSA', 'code' => 'KOM101']);
+            $mk3 = MataKuliah::create(['name' => 'PENGANGGARAN PERUSAHAAN', 'code' => 'MAN201']);
 
-        \App\Models\Jadwal::create(['prodi_id' => $prodi3->id, 'dosen_id' => $dosen1->id, 'mata_kuliah_id' => $mk1->id]);
-        \App\Models\Jadwal::create(['prodi_id' => $prodi1->id, 'dosen_id' => $dosen2->id, 'mata_kuliah_id' => $mk2->id]);
-        \App\Models\Jadwal::create(['prodi_id' => $prodi2->id, 'dosen_id' => $dosen3->id, 'mata_kuliah_id' => $mk3->id]);
+            Jadwal::create(['prodi_id' => $prodi3->id, 'dosen_id' => $dosen1->id, 'mata_kuliah_id' => $mk1->id]);
+            Jadwal::create(['prodi_id' => $prodi1->id, 'dosen_id' => $dosen2->id, 'mata_kuliah_id' => $mk2->id]);
+            Jadwal::create(['prodi_id' => $prodi2->id, 'dosen_id' => $dosen3->id, 'mata_kuliah_id' => $mk3->id]);
+            return;
+        }
+
+        $file = fopen($csvFile, 'r');
+        $headers = fgetcsv($file); // Skip header
+
+        // Cache array agar query lebih efisien
+        $prodis = [];
+        $dosens = [];
+        $matakuliahs = [];
+
+        while (($row = fgetcsv($file)) !== false) {
+            if (count($row) < 3) continue;
+            
+            $dosenName = trim($row[0]);
+            $mkRaw = trim($row[1]);
+            $prodiName = trim($row[2]);
+
+            // Skip data kosong
+            if (empty($dosenName) || empty($mkRaw) || empty($prodiName)) continue;
+
+            // Pisahkan nama MK dan SKS (contoh: "PENGOLAHAN CITRA - 3 SKS")
+            $mkParts = explode(' - ', $mkRaw);
+            $mkName = trim($mkParts[0]);
+
+            // 1. Simpan/Ambil Prodi
+            if (!isset($prodis[$prodiName])) {
+                $prodi = Prodi::firstOrCreate(['name' => $prodiName]);
+                $prodis[$prodiName] = $prodi->id;
+            }
+
+            // 2. Simpan/Ambil Dosen
+            if (!isset($dosens[$dosenName])) {
+                $dosen = Dosen::firstOrCreate(['name' => $dosenName]);
+                $dosens[$dosenName] = $dosen->id;
+            }
+
+            // 3. Simpan/Ambil MataKuliah
+            if (!isset($matakuliahs[$mkName])) {
+                $mk = MataKuliah::firstOrCreate(['name' => $mkName]);
+                $matakuliahs[$mkName] = $mk->id;
+            }
+
+            // 4. Simpan Jadwal (relasi ketiganya)
+            Jadwal::firstOrCreate([
+                'prodi_id' => $prodis[$prodiName],
+                'dosen_id' => $dosens[$dosenName],
+                'mata_kuliah_id' => $matakuliahs[$mkName]
+            ]);
+        }
+        fclose($file);
     }
 }

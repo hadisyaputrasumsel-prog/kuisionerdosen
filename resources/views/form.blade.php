@@ -57,7 +57,7 @@
             
             <div class="relative z-10">
                 <h1 class="text-3xl md:text-4xl font-extrabold mb-4 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-teal-700 to-indigo-700">
-                    Evaluasi Dosen dalam Mengajar <br class="hidden md:block"/>Tahun Akademik 2025/2026 Genap
+                    Evaluasi Dosen dalam Mengajar <br class="hidden md:block"/>Tahun Akademik {{ $periodeLabel }}
                 </h1>
                 <div class="text-gray-600 leading-relaxed space-y-4">
                     <p class="text-lg">Kuisioner ini merupakan instrumen pengukuran kinerja dosen dalam melakukan Tri Dharma Pendidikan berupa pendidikan/ pengajaran.</p>
@@ -104,53 +104,19 @@
             <!-- Section 3: Kuisioner -->
             <div id="questions_section" class="hidden space-y-8">
                 @php
-                    $sections = [
-                        [
-                            'title' => 'A. PROSES BELAJAR MENGAJAR',
-                            'questions' => [
-                                ['id' => 'q1', 'title' => 'Rencana materi dalam bentuk Rencana Pembelajaran Semester (RPS) dan tujuan mata kuliah dijelaskan saat awal semester perkuliahan'],
-                                ['id' => 'q2', 'title' => 'Dosen datang tepat waktu dan mengajar sesuai jadwal perkuliahan, kecuali berhalangan/ ditugaskan (Surat Tugas diinformasikan)'],
-                                ['id' => 'q3', 'title' => 'Diadakan tanya jawab, diskusi dan pembahasan latihan soal dalam proses pembelajaran'],
-                                ['id' => 'q4', 'title' => 'Manfaat soal latihan atau studi kasus dalam menambah pemahanan mata kuliah ini'],
-                                ['id' => 'q5', 'title' => 'Kesesuain evaluasi (tugas, kuis, UTS dan UAS) dengan materi yang diajarkan'],
-                                ['id' => 'q6', 'title' => 'Pembahasan (integrasi) hasil Penelitian dan/ atau hasil Pengabdian kepada Masyarakat yang berhubungan dengan mata kuliah'],
-                                ['id' => 'q7', 'title' => 'Sistematika menjelaskan kuliah (dosen menerangkan dengan baik kriteria penilaian secara rasional dan sesuai dengan aturan yang berlaku saat perjanjian pra kuliah)'],
-                                ['id' => 'q8', 'title' => 'Latihan soal terhadap setiap materi yang diberikan'],
-                                ['id' => 'q9', 'title' => 'Kesesuaian materi dan/ atau praktikum yang diberikan terhadap bahan kuliah']
-                            ]
-                        ],
-                        [
-                            'title' => 'B. KAPABILITAS (KOMPETENSI DOSEN)',
-                            'questions' => [
-                                ['id' => 'q10', 'title' => 'Kemampuan dosen dalam menjelaskan materi perkuliahan'],
-                                ['id' => 'q11', 'title' => 'Penguasaan materi, wawasan, materi perkuliahan dan praktikum'],
-                                ['id' => 'q12', 'title' => 'Kemampuan dosen menjawab pertanyaan'],
-                                ['id' => 'q13', 'title' => 'Penggunaan media pembelajaran pendukung seperti video, quizizz, kahoot, mentimeter dll'],
-                                ['id' => 'q14', 'title' => 'Kemampuan dosen dalam memberikan motivasi/ membangkitkan minat belajar, menghidupkan suasana kelas dan mendorong mahasiswa untuk bersikap/ berperilaku serta berbudi pekerti luhur'],
-                                ['id' => 'q15', 'title' => 'Kemampuan dosen mendorong mahasiswa/i untuk melakukan riset dan berkarya sesuai dengan bidang keahliannya']
-                            ]
-                        ],
-                        [
-                            'title' => 'C. KETERSEDIAAN SARANA',
-                            'questions' => [
-                                ['id' => 'q16', 'title' => 'Bahan ajar (handout/ filet ppt/ canva) tersedia dengan baik dan dibagikan melalui SIMAK atau LMS'],
-                                ['id' => 'q17', 'title' => 'Buku referensi (textbook) diinformasikan dan tersedia']
-                            ]
-                        ]
-                    ];
                     $questionNumber = 1;
                 @endphp
 
-                @foreach($sections as $section)
+                @foreach($groupedQuestions as $sectionName => $questions)
                     <div class="pt-4">
                         <div class="inline-block px-4 py-2 rounded-lg bg-indigo-100 text-indigo-800 font-bold tracking-wider text-sm mb-6 shadow-sm border border-indigo-200">
-                            {{ $section['title'] }}
+                            {{ $sectionName }}
                         </div>
 
                         <div class="space-y-6">
-                            @foreach($section['questions'] as $q)
+                            @foreach($questions as $q)
                             <div class="glass-card rounded-2xl p-6 sm:p-8 hover:shadow-xl transition-all duration-300 border-l-4 border-l-transparent hover:border-l-indigo-500">
-                                <label class="block text-lg font-medium text-gray-800 mb-8 leading-relaxed"><span class="font-bold text-indigo-600 mr-2">{{ $questionNumber++ }}.</span> {{ $q['title'] }} <span class="text-pink-500">*</span></label>
+                                <label class="block text-lg font-medium text-gray-800 mb-8 leading-relaxed"><span class="font-bold text-indigo-600 mr-2">{{ $questionNumber++ }}.</span> {{ $q->question_text }} <span class="text-pink-500">*</span></label>
                                 
                                 <div class="flex flex-col sm:flex-row sm:items-center justify-between sm:justify-center w-full max-w-2xl mx-auto px-2">
                                     <span class="text-sm font-semibold text-gray-400 uppercase tracking-widest hidden sm:block w-32 text-right pr-6">Sangat Kurang</span>
@@ -158,7 +124,7 @@
                                     <div class="flex justify-between sm:justify-center w-full sm:w-auto space-x-0 sm:space-x-6">
                                         @for($i = 1; $i <= 5; $i++)
                                             <label class="relative flex flex-col items-center cursor-pointer group">
-                                                <input type="radio" name="{{ $q['id'] }}" value="{{ $i }}" class="peer sr-only" required>
+                                                <input type="radio" name="q_{{ $q->id }}" value="{{ $i }}" class="peer sr-only" required>
                                                 <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center border-2 border-gray-200 bg-white text-gray-500 text-lg font-bold transition-all duration-200 ease-in-out group-hover:border-indigo-300 group-hover:bg-indigo-50 peer-checked:bg-indigo-600 peer-checked:border-indigo-600 peer-checked:text-white peer-checked:shadow-lg peer-checked:shadow-indigo-500/40 peer-focus-visible:ring-4 peer-focus-visible:ring-indigo-200 scale-100 peer-checked:scale-110">
                                                     {{ $i }}
                                                 </div>

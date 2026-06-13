@@ -12,6 +12,54 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        $sections = [
+            [
+                'title' => 'A. PROSES BELAJAR MENGAJAR',
+                'questions' => [
+                    'Rencana materi dalam bentuk Rencana Pembelajaran Semester (RPS) dan tujuan mata kuliah dijelaskan saat awal semester perkuliahan',
+                    'Dosen datang tepat waktu dan mengajar sesuai jadwal perkuliahan, kecuali berhalangan/ ditugaskan (Surat Tugas diinformasikan)',
+                    'Diadakan tanya jawab, diskusi dan pembahasan latihan soal dalam proses pembelajaran',
+                    'Manfaat soal latihan atau studi kasus dalam menambah pemahanan mata kuliah ini',
+                    'Kesesuain evaluasi (tugas, kuis, UTS dan UAS) dengan materi yang diajarkan',
+                    'Pembahasan (integrasi) hasil Penelitian dan/ atau hasil Pengabdian kepada Masyarakat yang berhubungan dengan mata kuliah',
+                    'Sistematika menjelaskan kuliah (dosen menerangkan dengan baik kriteria penilaian secara rasional dan sesuai dengan aturan yang berlaku saat perjanjian pra kuliah)',
+                    'Latihan soal terhadap setiap materi yang diberikan',
+                    'Kesesuaian materi dan/ atau praktikum yang diberikan terhadap bahan kuliah'
+                ]
+            ],
+            [
+                'title' => 'B. KAPABILITAS (KOMPETENSI DOSEN)',
+                'questions' => [
+                    'Kemampuan dosen dalam menjelaskan materi perkuliahan',
+                    'Penguasaan materi, wawasan, materi perkuliahan dan praktikum',
+                    'Kemampuan dosen menjawab pertanyaan',
+                    'Penggunaan media pembelajaran pendukung seperti video, quizizz, kahoot, mentimeter dll',
+                    'Kemampuan dosen dalam memberikan motivasi/ membangkitkan minat belajar, menghidupkan suasana kelas dan mendorong mahasiswa untuk bersikap/ berperilaku serta berbudi pekerti luhur',
+                    'Kemampuan dosen mendorong mahasiswa/i untuk melakukan riset dan berkarya sesuai dengan bidang keahliannya'
+                ]
+            ],
+            [
+                'title' => 'C. KETERSEDIAAN SARANA',
+                'questions' => [
+                    'Bahan ajar (handout/ filet ppt/ canva) tersedia dengan baik dan dibagikan melalui SIMAK atau LMS',
+                    'Buku referensi (textbook) diinformasikan dan tersedia'
+                ]
+            ]
+        ];
+
+        $order = 1;
+        foreach ($sections as $sec) {
+            foreach ($sec['questions'] as $q) {
+                \App\Models\Question::firstOrCreate([
+                    'section' => $sec['title'],
+                    'question_text' => $q,
+                ], [
+                    'is_active' => true,
+                    'order_num' => $order++
+                ]);
+            }
+        }
+
         $csvFile = base_path('semua_jadwal_ruangan.csv');
         
         if (!file_exists($csvFile)) {

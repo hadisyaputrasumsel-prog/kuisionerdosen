@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview Laporan Buku</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #525659;
+            display: flex;
+            justify-content: center;
+            font-family: 'Times New Roman', Times, serif;
+        }
+        .book-container {
+            width: 100%;
+            max-width: 21cm; /* A4 width */
+        }
+        .page {
+            background: white;
+            width: 21cm;
+            min-height: 29.7cm; /* A4 height */
+            padding: 2.5cm;
+            margin: 2cm auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            position: relative;
+        }
+        .controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .chapter-title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 14pt;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+        .content-text {
+            text-align: justify;
+            line-height: 1.5;
+            font-size: 12pt;
+        }
+        
+        /* Cover specific styling */
+        .cover-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            text-align: center;
+            padding-top: 4cm;
+            padding-bottom: 4cm;
+        }
+        .cover-logo {
+            max-width: 200px;
+            margin: 2rem 0;
+        }
+        .cover-title {
+            font-size: 20pt;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .cover-subtitle {
+            font-size: 16pt;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+        
+        /* Table styling for book */
+        .book-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 10pt;
+        }
+        .book-table th, .book-table td {
+            border: 1px solid #000;
+            padding: 6px;
+        }
+        .book-table th {
+            text-align: center;
+            background-color: #f2f2f2 !important;
+            -webkit-print-color-adjust: exact;
+        }
+
+        @media print {
+            body {
+                background: white;
+                display: block;
+            }
+            .controls { display: none; }
+            .book-container { max-width: none; }
+            .page {
+                margin: 0;
+                box-shadow: none;
+                page-break-after: always;
+            }
+            /* Remove margins for printing to allow browser to handle A4 */
+            @page {
+                size: A4;
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="controls">
+    <button onclick="window.print()" class="btn btn-primary shadow-lg btn-lg mb-2 d-block w-100">
+        <i class="bi bi-printer"></i> Cetak Laporan
+    </button>
+    <a href="{{ route('admin.laporan') }}" class="btn btn-light shadow-lg btn-lg d-block w-100">
+        <i class="bi bi-arrow-left"></i> Kembali
+    </a>
+</div>
+
+<div class="book-container">
+
+    <!-- COVER PAGE -->
+    <div class="page cover-page">
+        <div>
+            <div class="cover-title">LAPORAN HASIL SURVEY KEPUASAN MAHASISWA</div>
+            <div class="cover-subtitle">TERHADAP DOSEN DALAM PENGAJARAN</div>
+            
+            <div style="font-size: 14pt; margin-top: 10px;">
+                @if(request('periode'))
+                    <div class="mb-2">Periode: {{ request('periode') }}</div>
+                @endif
+                
+                @if(request('prodi_id'))
+                    <div class="fw-bold">TINGKAT PROGRAM STUDI: {{ strtoupper($prodis->firstWhere('id', request('prodi_id'))->name ?? '') }}</div>
+                @else
+                    <div class="fw-bold">TINGKAT UNIVERSITAS</div>
+                @endif
+            </div>
+        </div>
+
+        @if(!empty($config['cover']))
+            <img src="{{ asset($config['cover']) }}" alt="Logo" class="cover-logo" style="max-width: 300px; max-height: 300px; object-fit: contain;">
+        @else
+            <!-- Placeholder if no cover uploaded -->
+            <div style="height: 200px; display: flex; align-items: center; justify-content: center; border: 1px dashed #ccc; width: 100%; max-width: 200px; margin: 2rem auto;">
+                [Logo Kampus]
+            </div>
+        @endif
+
+        <div style="font-size: 16pt; font-weight: bold;">
+            UNIVERSITAS SUMATERA SELATAN<br>
+            TAHUN {{ date('Y') }}
+        </div>
+    </div>
+
+    <!-- KATA PENGANTAR -->
+    @if(!empty($config['kata_pengantar']))
+    <div class="page">
+        <div class="chapter-title">KATA PENGANTAR</div>
+        <div class="content-text">{!! $config['kata_pengantar'] !!}</div>
+    </div>
+    @endif
+
+    <!-- DAFTAR ISI -->
+    @if(!empty($config['daftar_isi']))
+    <div class="page">
+        <div class="chapter-title">DAFTAR ISI</div>
+        <div class="content-text">{!! $config['daftar_isi'] !!}</div>
+    </div>
+    @endif
+
+    <!-- BAB I -->
+    @if(!empty($config['bab1']))
+    <div class="page">
+        <div class="chapter-title">BAB I<br>PENDAHULUAN</div>
+        <div class="content-text">{!! $config['bab1'] !!}</div>
+    </div>
+    @endif
+
+    <!-- BAB II -->
+    @if(!empty($config['bab2']))
+    <div class="page">
+        <div class="chapter-title">BAB II<br>METODE EVALUASI</div>
+        <div class="content-text">{!! $config['bab2'] !!}</div>
+    </div>
+    @endif
+
+    <!-- BAB III & TABLE -->
+    <div class="page">
+        <div class="chapter-title">BAB III<br>HASIL EVALUASI</div>
+        @if(!empty($config['bab3']))
+            <div class="content-text mb-4">{!! $config['bab3'] !!}</div>
+        @endif
+
+        <table class="book-table">
+            <thead>
+                <tr>
+                    <th style="width: 5%;">No</th>
+                    <th style="width: 25%;">Nama Dosen</th>
+                    <th style="width: 25%;">Mata Kuliah</th>
+                    <th style="width: 15%;">Program Studi</th>
+                    <th style="width: 10%;">Resp.</th>
+                    <th style="width: 10%;">Nilai Rata-Rata</th>
+                    <th style="width: 10%;">Predikat</th>
+                </tr>
+            </thead>
+            <tbody>
+                @php $currentDosenId = null; @endphp
+                @forelse($jadwals as $index => $jadwal)
+                    <tr>
+                        <td style="text-align: center;">{{ $index + 1 }}</td>
+                        @if($currentDosenId !== $jadwal->dosen_id)
+                            <td><b>{{ $jadwal->dosen->name ?? 'N/A' }}</b></td>
+                            @php $currentDosenId = $jadwal->dosen_id; @endphp
+                        @else
+                            <td style="text-align: center; color: #666;">"</td>
+                        @endif
+                        
+                        @php 
+                            $mkName = $jadwal->mataKuliah->name ?? 'N/A';
+                            if(!empty($jadwal->mataKuliah->code) && $jadwal->mataKuliah->code !== 'N/A') {
+                                $mkName .= ' (' . $jadwal->mataKuliah->code . ')';
+                            }
+                        @endphp
+                        <td>{{ $mkName }}</td>
+                        
+                        <td style="text-align: center;">{{ $jadwal->prodi->name ?? 'N/A' }}</td>
+                        <td style="text-align: center;">{{ $jadwal->evaluations->count() }}</td>
+                        <td style="text-align: center;">{{ number_format($jadwal->average_score, 2) }}</td>
+                        <td style="text-align: center;">{{ $jadwal->predikat }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 20px;">Belum ada data evaluasi.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <!-- BAB IV -->
+    @if(!empty($config['bab4']))
+    <div class="page">
+        <div class="chapter-title">BAB IV<br>ANALISIS DAN PEMBAHASAN</div>
+        <div class="content-text">{!! $config['bab4'] !!}</div>
+    </div>
+    @endif
+
+    <!-- BAB V -->
+    @if(!empty($config['bab5']))
+    <div class="page">
+        <div class="chapter-title">BAB V<br>KESIMPULAN DAN REKOMENDASI</div>
+        <div class="content-text">{!! $config['bab5'] !!}</div>
+    </div>
+    @endif
+
+    <!-- LAMPIRAN 1: INSTRUMEN -->
+    <div class="page">
+        <div class="chapter-title">LAMPIRAN 1<br>INSTRUMEN KUESIONER</div>
+        <table class="book-table">
+            <thead>
+                <tr>
+                    <th style="width: 5%;">No</th>
+                    <th style="width: 25%;">Bagian</th>
+                    <th style="width: 70%;">Pertanyaan</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($questions as $index => $q)
+                <tr>
+                    <td style="text-align: center;">{{ $index + 1 }}</td>
+                    <td>{{ $q->section }}</td>
+                    <td>{{ $q->question_text }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+
+    <!-- LAMPIRAN 2: GRAFIK -->
+    <div class="page">
+        <div class="chapter-title">LAMPIRAN 2<br>GRAFIK HASIL SURVEI</div>
+        <div style="width: 90%; margin: 2rem auto;">
+            <canvas id="predikatChart"></canvas>
+        </div>
+    </div>
+
+    <!-- LAMPIRAN 3: SURAT TUGAS -->
+    @if(!empty($config['surat_tugas']))
+    <div class="page">
+        <div class="chapter-title">LAMPIRAN 3<br>SURAT TUGAS / KEPUTUSAN</div>
+        <div style="text-align: center; margin-top: 2rem;">
+            <img src="{{ asset($config['surat_tugas']) }}" style="max-width: 100%; max-height: 22cm; object-fit: contain;">
+        </div>
+    </div>
+    @endif
+
+    <!-- LAMPIRAN 4: DOKUMENTASI -->
+    @if(!empty($config['dokumentasi']))
+    <div class="page">
+        <div class="chapter-title">LAMPIRAN 4<br>DOKUMENTASI PELAKSANAAN</div>
+        <div style="text-align: center; margin-top: 2rem;">
+            <img src="{{ asset($config['dokumentasi']) }}" style="max-width: 100%; max-height: 22cm; object-fit: contain;">
+        </div>
+    </div>
+    @endif
+
+    <!-- LAMPIRAN TAMBAHAN -->
+    @if(!empty($config['lampiran']))
+    <div class="page">
+        <div class="chapter-title">LAMPIRAN TAMBAHAN</div>
+        <div class="content-text">{!! $config['lampiran'] !!}</div>
+    </div>
+    @endif
+
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var ctx = document.getElementById('predikatChart').getContext('2d');
+        var chartData = @json(array_values($chartData));
+        var chartLabels = @json(array_keys($chartData));
+        
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: chartLabels,
+                datasets: [{
+                    label: 'Jumlah Dosen per Predikat',
+                    data: chartData,
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.6)',
+                        'rgba(54, 162, 235, 0.6)',
+                        'rgba(255, 206, 86, 0.6)',
+                        'rgba(255, 159, 64, 0.6)',
+                        'rgba(255, 99, 132, 0.6)'
+                    ],
+                    borderColor: [
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(255, 99, 132, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    });
+</script>
+
+
+</body>
+</html>

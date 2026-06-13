@@ -14,4 +14,5 @@ class Jadwal extends Model
     public function prodi() { return $this->belongsTo(Prodi::class); }
     public function dosen() { return $this->belongsTo(Dosen::class); }
     public function mataKuliah() { return $this->belongsTo(MataKuliah::class); }
+    public function evaluations() { return $this->hasMany(Evaluation::class); }
 }

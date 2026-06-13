@@ -8,10 +8,16 @@ class Evaluation extends Model
 {
     protected $fillable = [
         'jadwal_id',
-        'q1',
-        'q2',
-        'q3',
-        'q4',
+        'answers',
         'saran'
     ];
+
+    protected $casts = [
+        'answers' => 'array',
+    ];
+
+    public function jadwal()
+    {
+        return $this->belongsTo(Jadwal::class);
+    }
 }

@@ -73,7 +73,7 @@
 
     <!-- Main Content -->
     <div class="flex-grow-1 bg-light p-4" style="margin-left: 280px; min-height: 100vh;">
-        <h2 class="mb-4 fw-bold text-dark">Sinkronisasi Data Jadwal</h2>
+        <h2 class="mb-4 fw-bold text-dark">Sinkronisasi Data Dosen dan Mata Kuliah</h2>
 
         @if(session('success'))
             <div class="alert alert-success shadow-sm">{{ session('success') }}</div>

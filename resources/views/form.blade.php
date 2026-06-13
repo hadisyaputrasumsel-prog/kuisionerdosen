@@ -119,7 +119,7 @@
                                 <label class="block text-lg font-medium text-gray-800 mb-8 leading-relaxed"><span class="font-bold text-indigo-600 mr-2">{{ $questionNumber++ }}.</span> {{ $q->question_text }} <span class="text-pink-500">*</span></label>
                                 
                                 <div class="flex flex-col sm:flex-row sm:items-center justify-between sm:justify-center w-full max-w-2xl mx-auto px-2">
-                                    <span class="text-sm font-semibold text-gray-400 uppercase tracking-widest hidden sm:block w-32 text-right pr-6">Sangat Kurang</span>
+                                    <span class="text-sm font-semibold text-gray-400 uppercase tracking-widest hidden sm:block w-40 whitespace-nowrap text-right pr-6">Sangat Kurang</span>
                                     
                                     <div class="flex justify-between sm:justify-center w-full sm:w-auto space-x-0 sm:space-x-6">
                                         @for($i = 1; $i <= 5; $i++)
@@ -132,7 +132,7 @@
                                         @endfor
                                     </div>
                                     
-                                    <span class="text-sm font-semibold text-gray-400 uppercase tracking-widest hidden sm:block w-32 text-left pl-6">Sangat Baik</span>
+                                    <span class="text-sm font-semibold text-gray-400 uppercase tracking-widest hidden sm:block w-40 whitespace-nowrap text-left pl-6">Sangat Baik</span>
                                 </div>
                                 
                                 <div class="flex justify-between sm:hidden mt-6 px-1 text-xs font-semibold text-gray-400 uppercase tracking-widest">

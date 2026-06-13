@@ -166,7 +166,7 @@
         <div class="row g-4 mb-4">
             <div class="col-lg-5">
                 <div class="premium-card h-100 p-4">
-                    <h5 class="fw-bold text-dark mb-4">Sebaran Jadwal per Prodi</h5>
+                    <h5 class="fw-bold text-dark mb-4">Sebaran Dosen dan Mata Kuliah Per Prodi</h5>
                     <div style="position: relative; height: 300px; width: 100%;">
                         <canvas id="prodiChart"></canvas>
                     </div>

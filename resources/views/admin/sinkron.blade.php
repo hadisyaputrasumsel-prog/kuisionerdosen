@@ -90,7 +90,7 @@
                     </div>
                     <div class="card-body p-4">
                         <p class="text-muted mb-4 text-center">
-                            Sistem akan mengambil data jadwal dari halaman <strong>JADWAL RUANGAN</strong> SIMAK (Seluruh Dosen & Program Studi). 
+                            Sistem akan mengambil data dosen mata kuliah dari halaman <strong>JADWAL RUANGAN</strong> SIMAK (Seluruh Dosen & Program Studi). 
                             Silakan masukkan kredensial SIMAK Anda di bawah ini.
                         </p>
                         

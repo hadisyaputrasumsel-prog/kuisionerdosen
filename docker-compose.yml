@@ -25,7 +25,7 @@ services:
       - app-network
 
   db:
-    image: mysql:8.0
+    image: mariadb:10.6
     ports:
       - "3307:3306"
     environment:

@@ -44,12 +44,19 @@
     </div>
 
     <div class="max-w-3xl mx-auto">
+        
+        <!-- University Branding -->
+        <div class="text-center mb-8 fade-in" style="animation-delay: 0.1s;">
+            <img src="{{ asset('uss-logo.png') }}" alt="Logo Universitas Sumatera Selatan" class="h-24 md:h-28 mx-auto mb-4 object-contain drop-shadow-md" onerror="this.style.display='none'">
+            <h2 class="text-xl md:text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-700 to-indigo-800 tracking-widest uppercase">Universitas Sumatera Selatan</h2>
+        </div>
+
         <!-- Header -->
         <div class="glass-card rounded-2xl mb-8 p-8 md:p-10 relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-teal-500 via-indigo-500 to-purple-500"></div>
             
             <div class="relative z-10">
-                <h1 class="text-3xl md:text-4xl font-extrabold mb-4 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-700 to-purple-700">
+                <h1 class="text-3xl md:text-4xl font-extrabold mb-4 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-teal-700 to-indigo-700">
                     Evaluasi Dosen dalam Mengajar <br class="hidden md:block"/>Tahun Akademik 2025/2026 Genap
                 </h1>
                 <div class="text-gray-600 leading-relaxed space-y-4">

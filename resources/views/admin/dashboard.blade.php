@@ -143,7 +143,7 @@
                     </div>
                     <div class="position-relative z-1">
                         <h2 class="display-4 fw-bolder mb-0 text-white">{{ $stats['total_jadwal'] }}</h2>
-                        <p class="mb-0 text-white-50 fw-semibold text-uppercase tracking-wider mt-1" style="font-size: 0.85rem; letter-spacing: 1px;">Total Jadwal Kelas</p>
+                        <p class="mb-0 text-white-50 fw-semibold text-uppercase tracking-wider mt-1" style="font-size: 0.85rem; letter-spacing: 1px;">Total Mata Kuliah</p>
                     </div>
                 </div>
             </div>

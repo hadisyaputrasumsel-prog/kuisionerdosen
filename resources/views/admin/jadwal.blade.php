@@ -113,7 +113,7 @@
         <!-- Tabel Data Jadwal -->
         <div class="card shadow border-0 rounded-3 overflow-hidden">
             <div class="card-header card-header-custom font-weight-bold py-3 d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 fw-bold">Daftar Jadwal Kuliah & Evaluasi</h5>
+                <h5 class="mb-0 fw-bold">Daftar Dosen & Evaluasi</h5>
                 <span class="badge bg-primary rounded-pill">{{ $jadwals->total() }} Total Data</span>
             </div>
             <div class="card-body p-0">

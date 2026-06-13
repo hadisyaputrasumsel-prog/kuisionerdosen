@@ -139,7 +139,7 @@
                             <hr class="my-4">
                             
                             <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm fw-bold" id="btn-submit-scrape" onclick="return confirm('Proses sinkronisasi akan memakan waktu. Lanjutkan?')" disabled>
-                                Tarik Seluruh Jadwal Sekarang
+                                Tarik Seluruh Data Sekarang
                             </button>
                         </form>
                     </div>

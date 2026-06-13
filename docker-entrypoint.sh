@@ -1,11 +1,14 @@
 #!/bin/bash
+echo "Starting entrypoint..."
 
 # Jalankan package discover terlebih dahulu
+echo "Menjalankan package:discover..."
 php artisan package:discover --ansi
 
 # Tunggu database mysql siap
 echo "Menunggu MySQL..."
 while ! php artisan db:show > /dev/null 2>&1; do
+  echo "Menunggu koneksi database..."
   sleep 2
 done
 

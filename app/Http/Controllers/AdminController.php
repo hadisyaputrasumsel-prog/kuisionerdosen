@@ -107,11 +107,13 @@ class AdminController extends Controller
         try {
             $cookieJar = new \GuzzleHttp\Cookie\CookieJar();
             
+            $baseUrl = env('SIMAK_BASE_URL', 'https://simak.uss.ac.id');
+            
             // 1. Login
             $loginRes = \Illuminate\Support\Facades\Http::withOptions(['verify' => false, 'cookies' => $cookieJar])
                 ->withHeaders(['Host' => 'simak.uss.ac.id'])
                 ->asForm()
-                ->post('https://simak.uss.ac.id/login/proses/', [
+                ->post($baseUrl . '/login/proses/', [
                     'username' => $request->simak_username,
                     'password' => $request->simak_password
                 ]);
@@ -119,7 +121,7 @@ class AdminController extends Controller
             // 2. Akses Dashboard
             $dashRes = \Illuminate\Support\Facades\Http::withOptions(['verify' => false, 'cookies' => $cookieJar])
                 ->withHeaders(['Host' => 'simak.uss.ac.id'])
-                ->get('https://simak.uss.ac.id/apps/dashboard/dashboard/');
+                ->get($baseUrl . '/apps/dashboard/dashboard/');
                 
             $html = $dashRes->body();
             
@@ -128,7 +130,7 @@ class AdminController extends Controller
             if (preg_match('/href="([^"]+\/apps\/dosen\/jadwal\/[^"]+)"/', $html, $matches)) {
                 $targetUrl = $matches[1];
                 if (!str_starts_with($targetUrl, 'http')) {
-                    $targetUrl = 'https://simak.uss.ac.id' . $targetUrl;
+                    $targetUrl = $baseUrl . $targetUrl;
                 }
             } else {
                 return response()->json(['success' => false, 'message' => 'Tidak dapat menemukan menu Jadwal. Pastikan login benar.']);
@@ -171,11 +173,13 @@ class AdminController extends Controller
         try {
             $cookieJar = new \GuzzleHttp\Cookie\CookieJar();
             
+            $baseUrl = env('SIMAK_BASE_URL', 'https://simak.uss.ac.id');
+            
             // 1. Login
             $loginRes = \Illuminate\Support\Facades\Http::withOptions(['verify' => false, 'cookies' => $cookieJar])
                 ->withHeaders(['Host' => 'simak.uss.ac.id'])
                 ->asForm()
-                ->post('https://simak.uss.ac.id/login/proses/', [
+                ->post($baseUrl . '/login/proses/', [
                     'username' => $request->simak_username,
                     'password' => $request->simak_password
                 ]);
@@ -183,7 +187,7 @@ class AdminController extends Controller
             // 2. Akses Dashboard
             $dashRes = \Illuminate\Support\Facades\Http::withOptions(['verify' => false, 'cookies' => $cookieJar])
                 ->withHeaders(['Host' => 'simak.uss.ac.id'])
-                ->get('https://simak.uss.ac.id/apps/dashboard/dashboard/');
+                ->get($baseUrl . '/apps/dashboard/dashboard/');
                 
             $html = $dashRes->body();
             
@@ -192,7 +196,7 @@ class AdminController extends Controller
             if (preg_match('/href="([^"]+\/apps\/dosen\/jadwal\/[^"]+)"/', $html, $matches)) {
                 $targetUrl = $matches[1];
                 if (!str_starts_with($targetUrl, 'http')) {
-                    $targetUrl = 'https://simak.uss.ac.id' . $targetUrl;
+                    $targetUrl = $baseUrl . $targetUrl;
                 }
                 
                 // Jika user memilih periode spesifik
@@ -231,7 +235,7 @@ class AdminController extends Controller
             }
 
             // Gunakan unit ID 5670 untuk USS Global Ruang Daftar
-            $globalUrl = "https://simak.uss.ac.id/apps/krs/gedung/ruang/daftar/5670/0~{$ta_id}~{$tipe}/";
+            $globalUrl = "{$baseUrl}/apps/krs/gedung/ruang/daftar/5670/0~{$ta_id}~{$tipe}/";
             
             // 4. Akses Jadwal Global
             $jadwalRes = \Illuminate\Support\Facades\Http::withOptions(['verify' => false, 'cookies' => $cookieJar])

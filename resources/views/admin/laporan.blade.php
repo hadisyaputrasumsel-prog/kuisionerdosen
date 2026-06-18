@@ -303,6 +303,7 @@
             height: 250,
             tabsize: 2,
             toolbar: [
+                ['history', ['undo', 'redo']],
                 ['style', ['style']],
                 ['font', ['bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', 'clear']],
                 ['fontname', ['fontname']],

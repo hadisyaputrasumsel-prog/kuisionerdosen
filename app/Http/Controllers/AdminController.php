@@ -411,7 +411,7 @@ class AdminController extends Controller
                 $file->move(public_path('uploads'), $filename);
                 $config['dokumentasi'] = 'uploads/' . $filename;
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return redirect()->back()->withErrors(['upload' => 'Error Upload: ' . $e->getMessage()])->withInput();
         }
 
@@ -432,7 +432,7 @@ class AdminController extends Controller
             if ($result === false) {
                 throw new \Exception("Gagal menulis ke file $configPath. Pastikan folder storage/app memiliki izin write (chmod 775/777).");
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return redirect()->back()->withErrors(['sistem' => $e->getMessage()])->withInput();
         }
 

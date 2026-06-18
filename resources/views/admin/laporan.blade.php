@@ -227,11 +227,7 @@
                                 <textarea name="kata_pengantar" class="form-control" rows="4" placeholder="Tuliskan kata pengantar di sini...">{{ $config['kata_pengantar'] ?? '' }}</textarea>
                             </div>
 
-                            <div class="mb-4">
-                                <label class="form-label fw-bold">Daftar Isi (Kosongkan untuk Auto-Generate)</label>
-                                <textarea name="daftar_isi" class="form-control" rows="4" placeholder="Tuliskan daftar isi secara manual di sini, atau KOSONGKAN agar sistem membuatnya secara otomatis...">{{ $config['daftar_isi'] ?? '' }}</textarea>
-                                <small class="text-muted">Jika dikosongkan, sistem akan otomatis mendeteksi BAB dan Lampiran untuk membuat Daftar Isi beserta perkiraan nomor halamannya.</small>
-                            </div>
+
 
                             <div class="row">
                                 <div class="col-md-6 mb-4">

@@ -172,13 +172,9 @@
     <!-- DAFTAR ISI -->
     <div class="page">
         <div class="chapter-title">DAFTAR ISI</div>
-        @if(!empty($config['daftar_isi']))
-            <div class="content-text">{!! $config['daftar_isi'] !!}</div>
-        @else
-            <div class="content-text" id="auto-toc">
-                <!-- Auto TOC injected via JS -->
-            </div>
-        @endif
+        <div class="content-text" id="auto-toc">
+            <!-- Auto TOC injected via JS -->
+        </div>
     </div>
 
     <!-- BAB I -->

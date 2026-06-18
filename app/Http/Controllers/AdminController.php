@@ -416,7 +416,6 @@ class AdminController extends Controller
         }
 
         $config['kata_pengantar'] = $request->kata_pengantar ?? '';
-        $config['daftar_isi'] = $request->daftar_isi ?? '';
         $config['bab1'] = $request->bab1 ?? '';
         $config['bab2'] = $request->bab2 ?? '';
         $config['bab3'] = $request->bab3 ?? '';

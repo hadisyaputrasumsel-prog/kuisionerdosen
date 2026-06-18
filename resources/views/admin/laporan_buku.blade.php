@@ -200,16 +200,22 @@
             <div class="content-text mb-4">{!! $config['bab3'] !!}</div>
         @endif
 
-        <table class="book-table">
+        <table class="book-table" style="font-size: 9pt;">
             <thead>
                 <tr>
-                    <th style="width: 5%;">No</th>
-                    <th style="width: 25%;">Nama Dosen</th>
-                    <th style="width: 25%;">Mata Kuliah</th>
-                    <th style="width: 15%;">Program Studi</th>
-                    <th style="width: 10%;">Resp.</th>
-                    <th style="width: 10%;">Nilai Rata-Rata</th>
-                    <th style="width: 10%;">Predikat</th>
+                    <th rowspan="2" style="width: 3%; vertical-align: middle;">No</th>
+                    <th rowspan="2" style="width: 15%; vertical-align: middle;">Nama Dosen</th>
+                    <th rowspan="2" style="width: 15%; vertical-align: middle;">Mata Kuliah</th>
+                    <th rowspan="2" style="width: 15%; vertical-align: middle;">Program Studi</th>
+                    <th rowspan="2" style="width: 5%; vertical-align: middle;">Resp.</th>
+                    <th colspan="3" style="text-align: center;">Kategori (Rata-Rata)</th>
+                    <th rowspan="2" style="width: 7%; vertical-align: middle;">Total Nilai</th>
+                    <th rowspan="2" style="width: 10%; vertical-align: middle;">Predikat</th>
+                </tr>
+                <tr>
+                    <th style="width: 8%;">Proses Belajar</th>
+                    <th style="width: 8%;">Kapabilitas</th>
+                    <th style="width: 8%;">Sarpras</th>
                 </tr>
             </thead>
             <tbody>
@@ -231,11 +237,22 @@
                             }
                         @endphp
                         <td>{{ $mkName }}</td>
-                        
                         <td style="text-align: center;">{{ $jadwal->prodi->name ?? 'N/A' }}</td>
                         <td style="text-align: center;">{{ $jadwal->evaluations->count() }}</td>
-                        <td style="text-align: center;">{{ number_format($jadwal->average_score, 2) }}</td>
-                        <td style="text-align: center;">{{ $jadwal->predikat }}</td>
+                        <td style="text-align: center;">
+                            {{ number_format($jadwal->avg_A, 1) }}<br>
+                            <small class="text-muted" style="font-size: 8pt;">({{ $jadwal->pred_A }})</small>
+                        </td>
+                        <td style="text-align: center;">
+                            {{ number_format($jadwal->avg_B, 1) }}<br>
+                            <small class="text-muted" style="font-size: 8pt;">({{ $jadwal->pred_B }})</small>
+                        </td>
+                        <td style="text-align: center;">
+                            {{ number_format($jadwal->avg_C, 1) }}<br>
+                            <small class="text-muted" style="font-size: 8pt;">({{ $jadwal->pred_C }})</small>
+                        </td>
+                        <td style="text-align: center; font-weight: bold;">{{ number_format($jadwal->average_score, 1) }}</td>
+                        <td style="text-align: center; font-weight: bold;">{{ $jadwal->predikat }}</td>
                     </tr>
                 @empty
                     <tr>

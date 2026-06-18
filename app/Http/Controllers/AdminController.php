@@ -322,26 +322,7 @@ class AdminController extends Controller
 
         $jadwals = $query->get();
 
-        // Hitung rata-rata per jadwal
-        foreach ($jadwals as $jadwal) {
-            $totalScore = 0;
-            $totalQuestions = 0;
-            foreach ($jadwal->evaluations as $eval) {
-                $answers = is_string($eval->answers) ? json_decode($eval->answers, true) : $eval->answers;
-                if (is_array($answers)) {
-                    $totalScore += array_sum($answers);
-                    $totalQuestions += count($answers);
-                }
-            }
-            $jadwal->average_score = $totalQuestions > 0 ? round($totalScore / $totalQuestions, 2) : 0;
-            
-            // Predikat
-            if ($jadwal->average_score >= 4.5) $jadwal->predikat = 'Sangat Baik';
-            elseif ($jadwal->average_score >= 3.5) $jadwal->predikat = 'Baik';
-            elseif ($jadwal->average_score >= 2.5) $jadwal->predikat = 'Cukup';
-            elseif ($jadwal->average_score >= 1.5) $jadwal->predikat = 'Kurang';
-            else $jadwal->predikat = 'Sangat Kurang';
-        }
+        $this->calculateJadwalScores($jadwals);
 
         $filterPeriodes = \App\Models\Jadwal::select('periode')->whereNotNull('periode')->distinct()->pluck('periode')->filter();
         $prodis = \App\Models\Prodi::orderBy('name')->get();
@@ -483,12 +464,14 @@ class AdminController extends Controller
 
         $questions = \App\Models\Question::where('is_active', true)->orderBy('section')->orderBy('order_num')->get();
 
+        $this->calculateJadwalScores($jadwals);
+
         $chartData = [
             'Sangat Baik' => 0,
             'Baik' => 0,
-            'Cukup' => 0,
-            'Kurang' => 0,
-            'Sangat Kurang' => 0,
+            'Sedang' => 0,
+            'Buruk' => 0,
+            'Sangat Buruk' => 0,
         ];
         foreach ($jadwals as $jadwal) {
             if (isset($chartData[$jadwal->predikat])) {
@@ -497,5 +480,79 @@ class AdminController extends Controller
         }
 
         return view('admin.laporan_buku', compact('jadwals', 'config', 'prodis', 'questions', 'chartData'));
+    }
+
+    private function calculateJadwalScores($jadwals)
+    {
+        // Cache questions mapping
+        $questions = \App\Models\Question::all();
+        $qSectionMap = [];
+        foreach ($questions as $q) {
+            if (strpos($q->section, 'A. PROSES') !== false) {
+                $qSectionMap[$q->id] = 'A';
+            } elseif (strpos($q->section, 'B. KAPABILITAS') !== false) {
+                $qSectionMap[$q->id] = 'B';
+            } elseif (strpos($q->section, 'C. KETERSEDIAAN') !== false) {
+                $qSectionMap[$q->id] = 'C';
+            }
+        }
+
+        foreach ($jadwals as $jadwal) {
+            $totalRespondents = $jadwal->evaluations->count();
+            
+            $scoreA = 0;
+            $scoreB = 0;
+            $scoreC = 0;
+            
+            foreach ($jadwal->evaluations as $eval) {
+                $answers = is_string($eval->answers) ? json_decode($eval->answers, true) : $eval->answers;
+                if (is_array($answers)) {
+                    foreach ($answers as $qId => $score) {
+                        if (isset($qSectionMap[$qId])) {
+                            if ($qSectionMap[$qId] === 'A') $scoreA += $score;
+                            elseif ($qSectionMap[$qId] === 'B') $scoreB += $score;
+                            elseif ($qSectionMap[$qId] === 'C') $scoreC += $score;
+                        }
+                    }
+                }
+            }
+            
+            $jadwal->avg_A = $totalRespondents > 0 ? round($scoreA / $totalRespondents, 2) : 0;
+            $jadwal->avg_B = $totalRespondents > 0 ? round($scoreB / $totalRespondents, 2) : 0;
+            $jadwal->avg_C = $totalRespondents > 0 ? round($scoreC / $totalRespondents, 2) : 0;
+            $jadwal->average_score = $jadwal->avg_A + $jadwal->avg_B + $jadwal->avg_C;
+
+            // Total Seluruh Indikator
+            $x = $jadwal->average_score;
+            if ($x >= 71.2) $jadwal->predikat = 'Sangat Baik';
+            elseif ($x >= 58.1) $jadwal->predikat = 'Baik';
+            elseif ($x >= 44.4) $jadwal->predikat = 'Sedang';
+            elseif ($x >= 30.7) $jadwal->predikat = 'Buruk';
+            else $jadwal->predikat = 'Sangat Buruk';
+
+            // Proses Belajar Mengajar
+            $xA = $jadwal->avg_A;
+            if ($xA >= 38.2) $jadwal->pred_A = 'Sangat Baik';
+            elseif ($xA >= 30.9) $jadwal->pred_A = 'Baik';
+            elseif ($xA >= 23.6) $jadwal->pred_A = 'Sedang';
+            elseif ($xA >= 16.3) $jadwal->pred_A = 'Buruk';
+            else $jadwal->pred_A = 'Sangat Buruk';
+
+            // Kapabilitas/Kompetensi Dosen
+            $xB = $jadwal->avg_B;
+            if ($xB >= 25.6) $jadwal->pred_B = 'Sangat Baik';
+            elseif ($xB >= 20.7) $jadwal->pred_B = 'Baik';
+            elseif ($xB >= 15.8) $jadwal->pred_B = 'Sedang';
+            elseif ($xB >= 10.9) $jadwal->pred_B = 'Buruk';
+            else $jadwal->pred_B = 'Sangat Buruk';
+
+            // Sarana Prasarana
+            $xC = $jadwal->avg_C;
+            if ($xC >= 8.8) $jadwal->pred_C = 'Sangat Baik';
+            elseif ($xC >= 7.1) $jadwal->pred_C = 'Baik';
+            elseif ($xC >= 5.4) $jadwal->pred_C = 'Sedang';
+            elseif ($xC >= 3.7) $jadwal->pred_C = 'Buruk';
+            else $jadwal->pred_C = 'Sangat Buruk';
+        }
     }
 }

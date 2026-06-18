@@ -228,8 +228,9 @@
                             </div>
 
                             <div class="mb-4">
-                                <label class="form-label fw-bold">Daftar Isi</label>
-                                <textarea name="daftar_isi" class="form-control" rows="4" placeholder="Tuliskan daftar isi di sini...">{{ $config['daftar_isi'] ?? '' }}</textarea>
+                                <label class="form-label fw-bold">Daftar Isi (Kosongkan untuk Auto-Generate)</label>
+                                <textarea name="daftar_isi" class="form-control" rows="4" placeholder="Tuliskan daftar isi secara manual di sini, atau KOSONGKAN agar sistem membuatnya secara otomatis...">{{ $config['daftar_isi'] ?? '' }}</textarea>
+                                <small class="text-muted">Jika dikosongkan, sistem akan otomatis mendeteksi BAB dan Lampiran untuk membuat Daftar Isi beserta perkiraan nomor halamannya.</small>
                             </div>
 
                             <div class="row">

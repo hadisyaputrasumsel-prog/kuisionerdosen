@@ -170,12 +170,16 @@
     @endif
 
     <!-- DAFTAR ISI -->
-    @if(!empty($config['daftar_isi']))
     <div class="page">
         <div class="chapter-title">DAFTAR ISI</div>
-        <div class="content-text">{!! $config['daftar_isi'] !!}</div>
+        @if(!empty($config['daftar_isi']))
+            <div class="content-text">{!! $config['daftar_isi'] !!}</div>
+        @else
+            <div class="content-text" id="auto-toc">
+                <!-- Auto TOC injected via JS -->
+            </div>
+        @endif
     </div>
-    @endif
 
     <!-- BAB I -->
     @if(!empty($config['bab1']))
@@ -369,9 +373,73 @@
                 }
             }
         });
+
+        // Auto Generate TOC
+        var autoToc = document.getElementById('auto-toc');
+        if (autoToc) {
+            function toRoman(num) {
+                var lookup = {m:1000,cm:900,d:500,cd:400,c:100,xc:90,l:50,xl:40,x:10,ix:9,v:5,iv:4,i:1};
+                var roman = '', i;
+                for (i in lookup) {
+                    while (num >= lookup[i]) {
+                        roman += i;
+                        num -= lookup[i];
+                    }
+                }
+                return roman;
+            }
+
+            var tocHtml = '<div style="margin-top: 1rem;">';
+            var dummy = document.createElement('div');
+            dummy.style.height = '29.7cm';
+            document.body.appendChild(dummy);
+            var a4Height = dummy.offsetHeight;
+            document.body.removeChild(dummy);
+
+            var pages = document.querySelectorAll('.page');
+            var preambleNum = 1;
+            var pageNum = 1;
+            var isRoman = true;
+
+            pages.forEach(function(page) {
+                var titleEl = page.querySelector('.chapter-title');
+                var printedPages = Math.ceil(page.offsetHeight / a4Height);
+                if (printedPages < 1) printedPages = 1;
+
+                if (titleEl) {
+                    var titleText = titleEl.innerHTML.replace(/<br\s*[\/]?>/gi, ' - ');
+                    // Bersihkan HTML tag (misal kalau ada strong/dll)
+                    var temp = document.createElement('div');
+                    temp.innerHTML = titleText;
+                    titleText = temp.textContent || temp.innerText || "";
+                    
+                    if (titleText.toUpperCase().includes('BAB I')) {
+                        isRoman = false;
+                        pageNum = 1; // Reset to 1 at BAB I
+                    }
+
+                    if (titleText.trim() !== '' && !titleText.toUpperCase().includes('DAFTAR ISI')) {
+                        var displayNum = isRoman ? toRoman(preambleNum) : pageNum;
+                        tocHtml += '<div style="display: flex; justify-content: space-between; margin-bottom: 10px;">' +
+                                   '<span style="font-weight: bold;">' + titleText + '</span>' +
+                                   '<span style="flex-grow: 1; border-bottom: 2px dotted #ccc; margin: 0 10px; position: relative; top: -6px;"></span>' +
+                                   '<span>' + displayNum + '</span>' +
+                                   '</div>';
+                    }
+                }
+
+                if (isRoman) {
+                    preambleNum += printedPages;
+                } else {
+                    pageNum += printedPages;
+                }
+            });
+
+            tocHtml += '</div>';
+            autoToc.innerHTML = tocHtml;
+        }
     });
 </script>
-
 
 </body>
 </html>

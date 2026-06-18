@@ -229,15 +229,14 @@
 
 
 
-                            <div class="row">
-                                <div class="col-md-6 mb-4">
-                                    <label class="form-label fw-bold">BAB I: PENDAHULUAN</label>
-                                    <textarea name="bab1" class="form-control" rows="5" placeholder="Latar belakang, tujuan, dll...">{{ $config['bab1'] ?? '' }}</textarea>
-                                </div>
-                                <div class="col-md-6 mb-4">
-                                    <label class="form-label fw-bold">BAB II: METODE EVALUASI</label>
-                                    <textarea name="bab2" class="form-control" rows="5" placeholder="Metodologi pengumpulan data, responden, dll...">{{ $config['bab2'] ?? '' }}</textarea>
-                                </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">BAB I: PENDAHULUAN</label>
+                                <textarea name="bab1" class="form-control" rows="5" placeholder="Latar belakang, tujuan, dll...">{{ $config['bab1'] ?? '' }}</textarea>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">BAB II: METODE EVALUASI</label>
+                                <textarea name="bab2" class="form-control" rows="5" placeholder="Metodologi pengumpulan data, responden, dll...">{{ $config['bab2'] ?? '' }}</textarea>
                             </div>
 
                             <div class="mb-4">
@@ -246,15 +245,14 @@
                                 <small class="text-muted">Tabel Data Jadwal akan otomatis disisipkan di bawah teks ini.</small>
                             </div>
 
-                            <div class="row">
-                                <div class="col-md-6 mb-4">
-                                    <label class="form-label fw-bold">BAB IV: ANALISIS DAN PEMBAHASAN</label>
-                                    <textarea name="bab4" class="form-control" rows="4" placeholder="Analisis hasil, kekuatan, kelemahan...">{{ $config['bab4'] ?? '' }}</textarea>
-                                </div>
-                                <div class="col-md-6 mb-4">
-                                    <label class="form-label fw-bold">BAB V: KESIMPULAN DAN REKOMENDASI</label>
-                                    <textarea name="bab5" class="form-control" rows="4" placeholder="Kesimpulan dan rekomendasi...">{{ $config['bab5'] ?? '' }}</textarea>
-                                </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">BAB IV: ANALISIS DAN PEMBAHASAN</label>
+                                <textarea name="bab4" class="form-control" rows="4" placeholder="Analisis hasil, kekuatan, kelemahan...">{{ $config['bab4'] ?? '' }}</textarea>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">BAB V: KESIMPULAN DAN REKOMENDASI</label>
+                                <textarea name="bab5" class="form-control" rows="4" placeholder="Kesimpulan dan rekomendasi...">{{ $config['bab5'] ?? '' }}</textarea>
                             </div>
 
                             <div class="row">
@@ -302,15 +300,18 @@
 <script>
     $(document).ready(function() {
         $('textarea').summernote({
-            height: 200,
+            height: 250,
             tabsize: 2,
             toolbar: [
                 ['style', ['style']],
-                ['font', ['bold', 'italic', 'underline', 'clear']],
+                ['font', ['bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', 'clear']],
+                ['fontname', ['fontname']],
+                ['fontsize', ['fontsize']],
                 ['color', ['color']],
                 ['para', ['ul', 'ol', 'paragraph']],
+                ['height', ['height']],
                 ['table', ['table']],
-                ['insert', ['link', 'picture']],
+                ['insert', ['link', 'picture', 'video', 'hr']],
                 ['view', ['fullscreen', 'codeview', 'help']]
             ]
         });

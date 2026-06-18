@@ -365,15 +365,33 @@ class AdminController extends Controller
 
     public function saveLaporanConfig(Request $request)
     {
+        $request->validate([
+            'cover' => 'nullable|file|image|max:10240', // Maksimal 10MB
+            'surat_tugas' => 'nullable|file|image|max:10240',
+            'dokumentasi' => 'nullable|file|image|max:10240',
+        ], [
+            'cover.max' => 'Ukuran file Cover maksimal adalah 10MB.',
+            'surat_tugas.max' => 'Ukuran file Surat Tugas maksimal adalah 10MB.',
+            'dokumentasi.max' => 'Ukuran file Dokumentasi maksimal adalah 10MB.',
+            'image' => 'File yang diupload harus berupa gambar (JPG/PNG).',
+        ]);
+
         $prodiStr = $request->prodi_id ? 'prodi_' . $request->prodi_id : 'univ';
         $configPath = storage_path("app/report_config_{$prodiStr}.json");
         $config = file_exists($configPath) ? json_decode(file_get_contents($configPath), true) : [];
+
+        // Pastikan folder uploads tersedia
+        if (!file_exists(public_path('uploads'))) {
+            mkdir(public_path('uploads'), 0777, true);
+        }
 
         if ($request->hasFile('cover')) {
             $file = $request->file('cover');
             $filename = 'cover_' . time() . '.' . $file->getClientOriginalExtension();
             $file->move(public_path('uploads'), $filename);
             $config['cover'] = 'uploads/' . $filename;
+        } elseif ($request->has('cover_error') || (isset($_FILES['cover']) && $_FILES['cover']['error'] !== 0 && $_FILES['cover']['error'] !== 4)) {
+            return redirect()->back()->withErrors(['cover' => 'Upload Cover gagal. Pastikan ukuran gambar tidak terlalu besar (batas server PHP: ' . ini_get('upload_max_filesize') . ').'])->withInput();
         }
 
         if ($request->hasFile('surat_tugas')) {

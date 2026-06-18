@@ -197,6 +197,16 @@
                         <div class="alert alert-info border-0 shadow-sm mb-4">
                             <i class="bi bi-info-circle-fill me-2"></i> Anda sedang mengedit konfigurasi untuk <strong>{{ request('prodi_id') ? 'Tingkat Program Studi: ' . ($prodis->firstWhere('id', request('prodi_id'))->name ?? '') : 'Tingkat Universitas' }}</strong>. Konfigurasi setiap tingkat disimpan secara terpisah.
                         </div>
+
+                        @if ($errors->any())
+                            <div class="alert alert-danger mb-4">
+                                <ul class="mb-0">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
                         <form action="{{ route('admin.laporan.config') }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             <input type="hidden" name="periode" value="{{ request('periode') }}">

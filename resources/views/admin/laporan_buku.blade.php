@@ -122,7 +122,11 @@
 
 <div class="book-container">
 
-    <!-- COVER PAGE -->
+    @if(!empty($config['cover']))
+    <div class="page" style="padding: 0; margin: 2cm auto; height: 29.7cm; overflow: hidden;">
+        <img src="{{ asset($config['cover']) }}" alt="Cover Full" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+    </div>
+    @else
     <div class="page cover-page">
         <div>
             <div class="cover-title">LAPORAN HASIL SURVEY KEPUASAN MAHASISWA</div>
@@ -155,6 +159,7 @@
             TAHUN {{ date('Y') }}
         </div>
     </div>
+    @endif
 
     <!-- KATA PENGANTAR -->
     @if(!empty($config['kata_pengantar']))

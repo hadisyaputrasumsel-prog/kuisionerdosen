@@ -380,32 +380,39 @@ class AdminController extends Controller
         $configPath = storage_path("app/report_config_{$prodiStr}.json");
         $config = file_exists($configPath) ? json_decode(file_get_contents($configPath), true) : [];
 
-        // Pastikan folder uploads tersedia
-        if (!file_exists(public_path('uploads'))) {
-            mkdir(public_path('uploads'), 0777, true);
-        }
+        try {
+            // Pastikan folder uploads tersedia
+            if (!file_exists(public_path('uploads'))) {
+                $dirCreated = @mkdir(public_path('uploads'), 0777, true);
+                if (!$dirCreated) {
+                    throw new \Exception("Gagal membuat direktori public/uploads. Periksa permission folder public.");
+                }
+            }
 
-        if ($request->hasFile('cover')) {
-            $file = $request->file('cover');
-            $filename = 'cover_' . time() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads'), $filename);
-            $config['cover'] = 'uploads/' . $filename;
-        } elseif ($request->has('cover_error') || (isset($_FILES['cover']) && $_FILES['cover']['error'] !== 0 && $_FILES['cover']['error'] !== 4)) {
-            return redirect()->back()->withErrors(['cover' => 'Upload Cover gagal. Pastikan ukuran gambar tidak terlalu besar (batas server PHP: ' . ini_get('upload_max_filesize') . ').'])->withInput();
-        }
+            if ($request->hasFile('cover')) {
+                $file = $request->file('cover');
+                $filename = 'cover_' . time() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('uploads'), $filename);
+                $config['cover'] = 'uploads/' . $filename;
+            } elseif ($request->has('cover_error') || (isset($_FILES['cover']) && $_FILES['cover']['error'] !== 0 && $_FILES['cover']['error'] !== 4)) {
+                return redirect()->back()->withErrors(['cover' => 'Upload Cover gagal. Pastikan ukuran gambar tidak terlalu besar (batas server PHP: ' . ini_get('upload_max_filesize') . ').'])->withInput();
+            }
 
-        if ($request->hasFile('surat_tugas')) {
-            $file = $request->file('surat_tugas');
-            $filename = 'surat_' . time() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads'), $filename);
-            $config['surat_tugas'] = 'uploads/' . $filename;
-        }
+            if ($request->hasFile('surat_tugas')) {
+                $file = $request->file('surat_tugas');
+                $filename = 'surat_' . time() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('uploads'), $filename);
+                $config['surat_tugas'] = 'uploads/' . $filename;
+            }
 
-        if ($request->hasFile('dokumentasi')) {
-            $file = $request->file('dokumentasi');
-            $filename = 'dok_' . time() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads'), $filename);
-            $config['dokumentasi'] = 'uploads/' . $filename;
+            if ($request->hasFile('dokumentasi')) {
+                $file = $request->file('dokumentasi');
+                $filename = 'dok_' . time() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('uploads'), $filename);
+                $config['dokumentasi'] = 'uploads/' . $filename;
+            }
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['upload' => 'Error Upload: ' . $e->getMessage()])->withInput();
         }
 
         $config['kata_pengantar'] = $request->kata_pengantar ?? '';
@@ -417,7 +424,17 @@ class AdminController extends Controller
         $config['bab5'] = $request->bab5 ?? '';
         $config['lampiran'] = $request->lampiran ?? '';
 
-        file_put_contents($configPath, json_encode($config));
+        try {
+            if (!is_array($config)) {
+                $config = [];
+            }
+            $result = @file_put_contents($configPath, json_encode($config));
+            if ($result === false) {
+                throw new \Exception("Gagal menulis ke file $configPath. Pastikan folder storage/app memiliki izin write (chmod 775/777).");
+            }
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['sistem' => $e->getMessage()])->withInput();
+        }
 
         return redirect()->route('admin.laporan.preview', [
             'periode' => $request->periode,

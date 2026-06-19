@@ -15,6 +15,13 @@ class AdminController extends Controller
 {
     public function index(Request $request)
     {
+        if (!$request->has('periode')) {
+            $activePeriode = \App\Models\Periode::where('is_active', true)->first()->name ?? null;
+            if ($activePeriode) {
+                $request->merge(['periode' => $activePeriode]);
+            }
+        }
+
         $periodes = Jadwal::select('periode')->distinct()->pluck('periode')->filter();
         
         $query = Jadwal::query();
@@ -49,6 +56,13 @@ class AdminController extends Controller
 
     public function jadwal(Request $request)
     {
+        if (!$request->has('periode')) {
+            $activePeriode = \App\Models\Periode::where('is_active', true)->first()->name ?? null;
+            if ($activePeriode) {
+                $request->merge(['periode' => $activePeriode]);
+            }
+        }
+
         $query = \App\Models\Jadwal::with(['dosen', 'mataKuliah', 'prodi'])
             ->join('dosens', 'jadwals.dosen_id', '=', 'dosens.id')
             ->select('jadwals.*')
@@ -307,6 +321,13 @@ class AdminController extends Controller
 
     public function laporan(Request $request)
     {
+        if (!$request->has('periode')) {
+            $activePeriode = \App\Models\Periode::where('is_active', true)->first()->name ?? null;
+            if ($activePeriode) {
+                $request->merge(['periode' => $activePeriode]);
+            }
+        }
+
         $query = \App\Models\Jadwal::with(['dosen', 'mataKuliah', 'prodi', 'evaluations'])
             ->join('dosens', 'jadwals.dosen_id', '=', 'dosens.id')
             ->select('jadwals.*')

@@ -359,28 +359,6 @@
             $groupedQuestions = $questions->groupBy('section');
         @endphp
 
-        <div style="page-break-before: always; margin-top: 30px;">
-            <div class="content-text mb-4">
-                <p>Berikut diagram survey Kepuasan Mahasiswa terhadap Dosen dalam Pembelajaran :</p>
-            </div>
-            
-            @foreach($groupedQuestions as $sectionName => $qs)
-                <div style="margin-bottom: 40px; border: 1px solid #ccc; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); page-break-inside: avoid;">
-                    <h4 style="background-color: #673ab7; color: white; padding: 10px 15px; border-radius: 5px; font-size: 12pt; margin-top: 0;">{{ $sectionName }}</h4>
-                    
-                    @foreach($qs as $q)
-                        <div style="margin-top: 20px; margin-bottom: 30px; page-break-inside: avoid;">
-                            <p style="font-size: 11pt; margin-bottom: 5px;">{{ $q->order_num }}. {{ $q->question_text }}</p>
-                            <p style="font-size: 9pt; color: #666; margin-bottom: 10px;">{{ $activeTotalResponden }} jawaban</p>
-                            
-                            <div style="position: relative; height: 250px; width: 100%;">
-                                <canvas id="barChart_{{ $q->id }}"></canvas>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            @endforeach
-        </div>
     </div>
 
     <!-- BAB IV -->
@@ -461,10 +439,24 @@
 
     <!-- LAMPIRAN 2: GRAFIK -->
     <div class="page">
-        <div class="chapter-title">LAMPIRAN 2<br>GRAFIK HASIL SURVEI</div>
-        <div style="width: 90%; margin: 2rem auto;">
-            <canvas id="predikatChart"></canvas>
-        </div>
+        <div class="chapter-title">LAMPIRAN 2<br>GRAFIK HASIL SURVEI INSTRUMEN</div>
+        
+        @foreach($groupedQuestions as $sectionName => $qs)
+            <div style="margin-top: 20px; margin-bottom: 40px; border: 1px solid #ccc; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); page-break-inside: avoid;">
+                <h4 style="background-color: #673ab7; color: white; padding: 10px 15px; border-radius: 5px; font-size: 12pt; margin-top: 0;">{{ $sectionName }}</h4>
+                
+                @foreach($qs as $q)
+                    <div style="margin-top: 20px; margin-bottom: 30px; page-break-inside: avoid;">
+                        <p style="font-size: 11pt; margin-bottom: 5px;">{{ $q->order_num }}. {{ $q->question_text }}</p>
+                        <p style="font-size: 9pt; color: #666; margin-bottom: 10px;">{{ $activeTotalResponden }} jawaban</p>
+                        
+                        <div style="position: relative; height: 250px; width: 100%;">
+                            <canvas id="barChart_{{ $q->id }}"></canvas>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @endforeach
     </div>
 
     <!-- LAMPIRAN 3: SURAT TUGAS -->

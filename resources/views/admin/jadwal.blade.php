@@ -76,9 +76,14 @@
     <div class="flex-grow-1 bg-light p-4" style="margin-left: 280px; min-height: 100vh;">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="fw-bold text-dark mb-0">Data Dosen dan Mata Kuliah</h2>
-            <button class="btn btn-warning shadow-sm fw-bold" data-bs-toggle="modal" data-bs-target="#periodeModal">
-                <i class="bi bi-gear-fill me-2"></i> Seting Periode Aktif
-            </button>
+            <div class="d-flex gap-2">
+                <a href="{{ route('admin.laporan.cetak-tabel', ['periode' => request('periode'), 'prodi_id' => request('prodi_id')]) }}" target="_blank" class="btn btn-primary shadow-sm fw-bold">
+                    <i class="bi bi-printer-fill me-2"></i> Cetak Daftar Evaluasi
+                </a>
+                <button class="btn btn-warning shadow-sm fw-bold" data-bs-toggle="modal" data-bs-target="#periodeModal">
+                    <i class="bi bi-gear-fill me-2"></i> Seting Periode Aktif
+                </button>
+            </div>
         </div>
 
         <!-- Filter -->

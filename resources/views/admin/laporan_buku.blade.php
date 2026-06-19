@@ -428,7 +428,7 @@
                     temp.innerHTML = titleText;
                     titleText = temp.textContent || temp.innerText || "";
                     
-                    if (titleText.toUpperCase().includes('BAB I')) {
+                    if (titleText.toUpperCase().includes('BAB I -')) {
                         isRoman = false;
                         pageNum = 1;
                     }

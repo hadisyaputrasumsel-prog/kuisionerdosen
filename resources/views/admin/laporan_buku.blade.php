@@ -346,9 +346,11 @@
                 foreach($j->evaluations as $eval) {
                     $answers = is_string($eval->answers) ? json_decode($eval->answers, true) : $eval->answers;
                     if(is_array($answers)) {
-                        foreach($answers as $qId => $score) {
-                            if(isset($questionTallies[$qId][$score])) {
-                                $questionTallies[$qId][$score]++;
+                        foreach($answers as $qKey => $score) {
+                            $qId = (int) str_replace('q_', '', $qKey);
+                            $intScore = (int) $score;
+                            if(isset($questionTallies[$qId][$intScore])) {
+                                $questionTallies[$qId][$intScore]++;
                             }
                         }
                     }

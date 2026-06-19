@@ -7,6 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <style>
         body {
             background-color: #525659;
@@ -225,7 +226,7 @@
                 $dosenLabels = array_keys($dosenStats);
                 $dosenData = array_values($dosenStats);
 
-                $pieChartHtml = '<div style="width: 70%; margin: 30px auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);"><h4 style="text-align: center; margin-bottom: 20px; font-size: 14pt;">Proporsi Responden Berdasarkan Dosen</h4><canvas id="dosenPieChart"></canvas></div>';
+                $pieChartHtml = '<div style="width: 85%; margin: 30px auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);"><h4 style="text-align: center; margin-bottom: 20px; font-size: 14pt;">Proporsi Responden Berdasarkan Dosen</h4><div style="position: relative; height: 350px; width: 100%; display: flex; justify-content: center;"><canvas id="dosenPieChart"></canvas></div></div>';
                 $bab3Content = str_replace('[PIE_CHART_DOSEN]', $pieChartHtml, $bab3Content);
             }
         @endphp
@@ -502,6 +503,7 @@
             
             new Chart(ctxDosen, {
                 type: 'pie',
+                plugins: [ChartDataLabels],
                 data: {
                     labels: dosenLabels,
                     datasets: [{
@@ -515,9 +517,35 @@
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: 10
+                    },
                     plugins: {
+                        datalabels: {
+                            color: '#fff',
+                            font: {
+                                weight: 'bold',
+                                size: 12
+                            },
+                            formatter: (value, ctx) => {
+                                let sum = 0;
+                                let dataArr = ctx.chart.data.datasets[0].data;
+                                dataArr.map(data => {
+                                    sum += data;
+                                });
+                                let percentage = (value * 100 / sum).toFixed(1) + "%";
+                                return percentage;
+                            }
+                        },
                         legend: {
                             position: 'right',
+                            labels: {
+                                font: {
+                                    size: 11
+                                },
+                                padding: 15
+                            }
                         },
                         tooltip: {
                             callbacks: {

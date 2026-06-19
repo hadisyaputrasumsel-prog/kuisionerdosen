@@ -200,22 +200,22 @@
             <div class="content-text mb-4">{!! $config['bab3'] !!}</div>
         @endif
 
-        <table class="book-table" style="font-size: 9pt;">
+        <table class="book-table" style="font-size: 8pt;">
             <thead>
                 <tr>
                     <th rowspan="2" style="width: 3%; vertical-align: middle;">No</th>
-                    <th rowspan="2" style="width: 15%; vertical-align: middle;">Nama Dosen</th>
-                    <th rowspan="2" style="width: 15%; vertical-align: middle;">Mata Kuliah</th>
-                    <th rowspan="2" style="width: 15%; vertical-align: middle;">Program Studi</th>
-                    <th rowspan="2" style="width: 5%; vertical-align: middle;">Resp.</th>
+                    <th rowspan="2" style="width: 18%; vertical-align: middle;">Nama Dosen</th>
+                    <th rowspan="2" style="width: 18%; vertical-align: middle;">Mata Kuliah</th>
+                    <th rowspan="2" style="width: 11%; vertical-align: middle;">Program Studi</th>
+                    <th rowspan="2" style="width: 4%; vertical-align: middle;">Resp.</th>
                     <th colspan="3" style="text-align: center;">Kategori (Rata-Rata)</th>
-                    <th rowspan="2" style="width: 7%; vertical-align: middle;">Total Nilai</th>
-                    <th rowspan="2" style="width: 10%; vertical-align: middle;">Predikat</th>
+                    <th rowspan="2" style="width: 8%; vertical-align: middle;">Total Nilai</th>
+                    <th rowspan="2" style="width: 11%; vertical-align: middle;">Predikat</th>
                 </tr>
                 <tr>
-                    <th style="width: 8%;">Proses Belajar</th>
-                    <th style="width: 8%;">Kapabilitas</th>
-                    <th style="width: 8%;">Sarpras</th>
+                    <th style="width: 9%; vertical-align: middle;">Proses Belajar</th>
+                    <th style="width: 9%; vertical-align: middle;">Kapabilitas</th>
+                    <th style="width: 9%; vertical-align: middle;">Sarpras</th>
                 </tr>
             </thead>
             <tbody>
@@ -227,7 +227,7 @@
                             <td><b>{{ $jadwal->dosen->name ?? 'N/A' }}</b></td>
                             @php $currentDosenId = $jadwal->dosen_id; @endphp
                         @else
-                            <td style="text-align: center; color: #666;">"</td>
+                            <td style="text-align: center; color: #888; font-size: 10pt;">"</td>
                         @endif
                         
                         @php 
@@ -240,18 +240,18 @@
                         <td style="text-align: center;">{{ $jadwal->prodi->name ?? 'N/A' }}</td>
                         <td style="text-align: center;">{{ $jadwal->evaluations->count() }}</td>
                         <td style="text-align: center;">
-                            {{ number_format($jadwal->avg_A, 1) }}<br>
-                            <small class="text-muted" style="font-size: 8pt;">({{ $jadwal->pred_A }})</small>
+                            <span style="font-size: 9pt;">{{ number_format($jadwal->avg_A, 1) }}</span>
+                            <span class="text-muted" style="font-size: 6.5pt; display: block; margin-top: 1px;">({{ $jadwal->pred_A }})</span>
                         </td>
                         <td style="text-align: center;">
-                            {{ number_format($jadwal->avg_B, 1) }}<br>
-                            <small class="text-muted" style="font-size: 8pt;">({{ $jadwal->pred_B }})</small>
+                            <span style="font-size: 9pt;">{{ number_format($jadwal->avg_B, 1) }}</span>
+                            <span class="text-muted" style="font-size: 6.5pt; display: block; margin-top: 1px;">({{ $jadwal->pred_B }})</span>
                         </td>
                         <td style="text-align: center;">
-                            {{ number_format($jadwal->avg_C, 1) }}<br>
-                            <small class="text-muted" style="font-size: 8pt;">({{ $jadwal->pred_C }})</small>
+                            <span style="font-size: 9pt;">{{ number_format($jadwal->avg_C, 1) }}</span>
+                            <span class="text-muted" style="font-size: 6.5pt; display: block; margin-top: 1px;">({{ $jadwal->pred_C }})</span>
                         </td>
-                        <td style="text-align: center; font-weight: bold;">{{ number_format($jadwal->average_score, 1) }}</td>
+                        <td style="text-align: center; font-weight: bold; font-size: 9pt;">{{ number_format($jadwal->average_score, 1) }}</td>
                         <td style="text-align: center; font-weight: bold;">{{ $jadwal->predikat }}</td>
                     </tr>
                 @empty

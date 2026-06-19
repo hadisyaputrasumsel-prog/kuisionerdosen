@@ -234,12 +234,31 @@
             $activeProdiName = request('prodi_id') ? ($prodis->firstWhere('id', request('prodi_id'))->name ?? 'Ilmu Komputer') : 'ILMU KOMPUTER Fakultas Ilmu Komputer Universitas Sumatera Selatan';
             $activePeriodeName = request('periode') ?? 'saat ini';
             $activeTotalResponden = 0;
-            foreach($jadwals as $j) { $activeTotalResponden += $j->evaluations->count(); }
+            $overallTotalScore = 0;
+            $overallTotalQuestions = 0;
+            
+            foreach($jadwals as $j) { 
+                $activeTotalResponden += $j->evaluations->count(); 
+                foreach ($j->evaluations as $eval) {
+                    $answers = is_string($eval->answers) ? json_decode($eval->answers, true) : $eval->answers;
+                    if (is_array($answers)) {
+                        $overallTotalScore += array_sum($answers);
+                        $overallTotalQuestions += count($answers);
+                    }
+                }
+            }
             $activeTotalDosen = $jadwals->unique('dosen_id')->count();
 
+            $overallAvgScore = $overallTotalQuestions > 0 ? ($overallTotalScore / $overallTotalQuestions) : 0;
+            $overallPredikat = 'Sangat Kurang';
+            if ($overallAvgScore >= 4.5) $overallPredikat = 'Sangat Baik';
+            elseif ($overallAvgScore >= 3.5) $overallPredikat = 'Baik';
+            elseif ($overallAvgScore >= 2.5) $overallPredikat = 'Cukup';
+            elseif ($overallAvgScore >= 1.5) $overallPredikat = 'Kurang';
+
             $bab3Content = str_replace(
-                ['[NAMA_PRODI]', '[PERIODE]', '[TOTAL_RESPONDEN]', '[TOTAL_DOSEN]'],
-                [$activeProdiName, $activePeriodeName, $activeTotalResponden, $activeTotalDosen],
+                ['[NAMA_PRODI]', '[PERIODE]', '[TOTAL_RESPONDEN]', '[TOTAL_DOSEN]', '[RATA_RATA_PREDIKAT]'],
+                [$activeProdiName, $activePeriodeName, $activeTotalResponden, $activeTotalDosen, $overallPredikat],
                 $bab3Content
             );
         @endphp

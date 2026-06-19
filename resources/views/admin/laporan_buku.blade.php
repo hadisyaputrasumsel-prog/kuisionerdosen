@@ -357,7 +357,6 @@
             $groupedQuestions = $questions->groupBy('section');
         @endphp
 
-        @if(str_contains($config['bab3'] ?? '', '[GRAFIK_INSTRUMEN]') || empty($config['bab3']))
         <div style="page-break-before: always; margin-top: 30px;">
             <div class="content-text mb-4">
                 <p>Berikut diagram survey Kepuasan Mahasiswa terhadap Dosen dalam Pembelajaran :</p>
@@ -380,7 +379,6 @@
                 </div>
             @endforeach
         </div>
-        @endif
     </div>
 
     <!-- BAB IV -->

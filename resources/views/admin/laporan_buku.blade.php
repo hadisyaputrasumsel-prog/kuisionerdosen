@@ -47,6 +47,17 @@
             font-size: 12pt;
         }
         
+        /* Formating for tables created from TinyMCE */
+        .content-text table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        .content-text th, .content-text td {
+            border: 1px solid #000;
+            padding: 8px;
+        }
+        
         /* Cover specific styling */
         .cover-page {
             display: flex;

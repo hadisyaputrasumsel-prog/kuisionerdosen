@@ -26,8 +26,11 @@ php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 
+# Pastikan folder public/uploads ada
+mkdir -p /var/www/html/public/uploads
+
 # Perbaiki izin setelah artisan command membuat file cache/log
-chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/public/uploads
 
 # Jalankan perintah utama (CMD)
 exec "$@"

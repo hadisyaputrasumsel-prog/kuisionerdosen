@@ -343,7 +343,7 @@
     document.addEventListener("DOMContentLoaded", function() {
         tinymce.init({
             selector: 'textarea',
-            height: 350,
+            height: 600,
             menubar: true,
             plugins: [
                 'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',

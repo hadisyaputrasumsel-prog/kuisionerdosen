@@ -385,9 +385,38 @@
 
     <!-- BAB IV -->
     @if(!empty($config['bab4']))
+    @php
+        $bab4Content = $config['bab4'];
+        $sumAvgA = 0; $sumAvgB = 0; $sumAvgC = 0;
+        $countJadwal = $jadwals->count();
+
+        foreach($jadwals as $j) {
+            $sumAvgA += $j->avg_A;
+            $sumAvgB += $j->avg_B;
+            $sumAvgC += $j->avg_C;
+        }
+
+        $overallAvgA = $countJadwal > 0 ? round($sumAvgA / $countJadwal, 1) : 0;
+        $overallAvgB = $countJadwal > 0 ? round($sumAvgB / $countJadwal, 1) : 0;
+        $overallAvgC = $countJadwal > 0 ? round($sumAvgC / $countJadwal, 1) : 0;
+
+        $getPred = function($score) {
+            if ($score >= 4.5) return 'Sangat Baik';
+            if ($score >= 3.5) return 'Baik';
+            if ($score >= 2.5) return 'Cukup';
+            if ($score >= 1.5) return 'Kurang';
+            return 'Sangat Kurang';
+        };
+
+        $bab4Content = str_replace(
+            ['[NAMA_PRODI]', '[PERIODE]', '[RATA_RATA_PREDIKAT]', '[SKOR_PBM]', '[PREDIKAT_PBM]', '[SKOR_KKD]', '[PREDIKAT_KKD]', '[SKOR_KSP]', '[PREDIKAT_KSP]'],
+            [$activeProdiName, $activePeriodeName, $overallPredikat, number_format($overallAvgA, 1), $getPred($overallAvgA), number_format($overallAvgB, 1), $getPred($overallAvgB), number_format($overallAvgC, 1), $getPred($overallAvgC)],
+            $bab4Content
+        );
+    @endphp
     <div class="page">
         <div class="chapter-title">BAB IV<br>ANALISIS DAN PEMBAHASAN</div>
-        <div class="content-text">{!! $config['bab4'] !!}</div>
+        <div class="content-text">{!! $bab4Content !!}</div>
     </div>
     @endif
 

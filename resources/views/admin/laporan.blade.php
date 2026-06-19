@@ -221,64 +221,107 @@
                                 <input class="form-control" type="file" name="cover" accept="image/*">
                             </div>
 
-                            <div class="mb-4">
-                                <label class="form-label fw-bold">Kata Pengantar</label>
-                                <textarea name="kata_pengantar" class="form-control" rows="4" placeholder="Tuliskan kata pengantar di sini...">{{ $config['kata_pengantar'] ?? '' }}</textarea>
-                            </div>
-
-
-
-                            <div class="mb-4">
-                                <label class="form-label fw-bold">BAB I: PENDAHULUAN</label>
-                                <textarea name="bab1" class="form-control" rows="5" placeholder="Latar belakang, tujuan, dll...">{{ $config['bab1'] ?? '' }}</textarea>
-                            </div>
-                            
-                            <div class="mb-4">
-                                <label class="form-label fw-bold">BAB II: METODE EVALUASI</label>
-                                <textarea name="bab2" class="form-control" rows="5" placeholder="Metodologi pengumpulan data, responden, dll...">{{ $config['bab2'] ?? '' }}</textarea>
-                            </div>
-
-                            <div class="mb-4">
-                                <label class="form-label fw-bold">BAB III: HASIL EVALUASI (Pengantar Tabel)</label>
-                                <textarea name="bab3" class="form-control" rows="2" placeholder="Pengantar sebelum tabel data ditampilkan...">{{ $config['bab3'] ?? '' }}</textarea>
-                                <small class="text-muted">Tabel Data Jadwal akan otomatis disisipkan di bawah teks ini.</small>
-                            </div>
-
-                            <div class="mb-4">
-                                <label class="form-label fw-bold">BAB IV: ANALISIS DAN PEMBAHASAN</label>
-                                <textarea name="bab4" class="form-control" rows="4" placeholder="Analisis hasil, kekuatan, kelemahan...">{{ $config['bab4'] ?? '' }}</textarea>
-                            </div>
-                            
-                            <div class="mb-4">
-                                <label class="form-label fw-bold">BAB V: KESIMPULAN DAN REKOMENDASI</label>
-                                <textarea name="bab5" class="form-control" rows="4" placeholder="Kesimpulan dan rekomendasi...">{{ $config['bab5'] ?? '' }}</textarea>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6 mb-4">
-                                    <label class="form-label fw-bold">Surat Tugas / Keputusan (Upload Gambar)</label>
-                                    @if(isset($config['surat_tugas']) && $config['surat_tugas'])
-                                        <div class="mb-2">
-                                            <img src="{{ asset($config['surat_tugas']) }}" alt="Surat Tugas" class="img-thumbnail" style="max-height: 100px;">
+                            <div class="accordion mb-4" id="editorAccordion">
+                                
+                                <!-- Kata Pengantar -->
+                                <div class="accordion-item mb-2 border rounded">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#colKataPengantar">
+                                            KATA PENGANTAR
+                                        </button>
+                                    </h2>
+                                    <div id="colKataPengantar" class="accordion-collapse collapse">
+                                        <div class="accordion-body bg-light">
+                                            <textarea name="kata_pengantar" class="form-control" rows="4" placeholder="Tuliskan kata pengantar di sini...">{{ $config['kata_pengantar'] ?? '' }}</textarea>
                                         </div>
-                                    @endif
-                                    <input class="form-control" type="file" name="surat_tugas" accept="image/*">
+                                    </div>
                                 </div>
-                                <div class="col-md-6 mb-4">
-                                    <label class="form-label fw-bold">Dokumentasi Pelaksanaan (Upload Gambar)</label>
-                                    @if(isset($config['dokumentasi']) && $config['dokumentasi'])
-                                        <div class="mb-2">
-                                            <img src="{{ asset($config['dokumentasi']) }}" alt="Dokumentasi" class="img-thumbnail" style="max-height: 100px;">
-                                        </div>
-                                    @endif
-                                    <input class="form-control" type="file" name="dokumentasi" accept="image/*">
-                                </div>
-                            </div>
 
-                            <div class="mb-4">
-                                <label class="form-label fw-bold">Catatan Tambahan Lampiran</label>
-                                <textarea name="lampiran" class="form-control" rows="4" placeholder="Catatan atau teks tambahan untuk lampiran jika diperlukan...">{{ $config['lampiran'] ?? '' }}</textarea>
-                                <small class="text-muted">Instrumen Kuesioner, Grafik Hasil, dan Tabel Rekapitulasi akan dibuat <strong>secara otomatis</strong> oleh sistem dan disisipkan sebelum bagian lampiran ini.</small>
+                                <!-- BAB I -->
+                                <div class="accordion-item mb-2 border rounded">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#colBab1">
+                                            BAB I: PENDAHULUAN
+                                        </button>
+                                    </h2>
+                                    <div id="colBab1" class="accordion-collapse collapse">
+                                        <div class="accordion-body bg-light">
+                                            <textarea name="bab1" class="form-control" rows="5" placeholder="Latar belakang, tujuan, dll...">{{ $config['bab1'] ?? '' }}</textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- BAB II -->
+                                <div class="accordion-item mb-2 border rounded">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#colBab2">
+                                            BAB II: METODE EVALUASI
+                                        </button>
+                                    </h2>
+                                    <div id="colBab2" class="accordion-collapse collapse">
+                                        <div class="accordion-body bg-light">
+                                            <textarea name="bab2" class="form-control" rows="5" placeholder="Metodologi pengumpulan data, responden, dll...">{{ $config['bab2'] ?? '' }}</textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- BAB III -->
+                                <div class="accordion-item mb-2 border rounded">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#colBab3">
+                                            BAB III: HASIL EVALUASI
+                                        </button>
+                                    </h2>
+                                    <div id="colBab3" class="accordion-collapse collapse">
+                                        <div class="accordion-body bg-light">
+                                            <p class="text-muted small mb-2"><i class="bi bi-info-circle me-1"></i> Pengantar sebelum tabel data ditampilkan. Tabel Data Jadwal akan otomatis disisipkan di bawah teks ini.</p>
+                                            <textarea name="bab3" class="form-control" rows="2" placeholder="Pengantar sebelum tabel data ditampilkan...">{{ $config['bab3'] ?? '' }}</textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- BAB IV -->
+                                <div class="accordion-item mb-2 border rounded">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#colBab4">
+                                            BAB IV: ANALISIS DAN PEMBAHASAN
+                                        </button>
+                                    </h2>
+                                    <div id="colBab4" class="accordion-collapse collapse">
+                                        <div class="accordion-body bg-light">
+                                            <textarea name="bab4" class="form-control" rows="4" placeholder="Analisis hasil, kekuatan, kelemahan...">{{ $config['bab4'] ?? '' }}</textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- BAB V -->
+                                <div class="accordion-item mb-2 border rounded">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#colBab5">
+                                            BAB V: KESIMPULAN DAN REKOMENDASI
+                                        </button>
+                                    </h2>
+                                    <div id="colBab5" class="accordion-collapse collapse">
+                                        <div class="accordion-body bg-light">
+                                            <textarea name="bab5" class="form-control" rows="4" placeholder="Kesimpulan dan rekomendasi...">{{ $config['bab5'] ?? '' }}</textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- LAMPIRAN -->
+                                <div class="accordion-item mb-2 border rounded">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#colLampiran">
+                                            LAMPIRAN TAMBAHAN
+                                        </button>
+                                    </h2>
+                                    <div id="colLampiran" class="accordion-collapse collapse">
+                                        <div class="accordion-body bg-light">
+                                            <p class="text-muted small mb-2"><i class="bi bi-info-circle me-1"></i> Instrumen Kuesioner, Grafik Hasil, dan Tabel Rekapitulasi akan dibuat <strong>secara otomatis</strong> oleh sistem dan disisipkan sebelum bagian lampiran ini.</p>
+                                            <textarea name="lampiran" class="form-control" rows="4" placeholder="Catatan atau teks tambahan untuk lampiran jika diperlukan...">{{ $config['lampiran'] ?? '' }}</textarea>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <hr>

@@ -385,10 +385,10 @@ class AdminController extends Controller
             }
         }
 
-        $query = \App\Models\Jadwal::with(['dosen', 'mataKuliah', 'prodi', 'evaluations'])
+        $query = \App\Models\Jadwal::with(['dosen', 'mataKuliah', 'prodi'])
             ->join('dosens', 'jadwals.dosen_id', '=', 'dosens.id')
             ->select('jadwals.*')
-            ->has('evaluations')
+            ->withCount('evaluations')
             ->orderBy('dosens.name', 'asc');
 
         if ($request->filled('periode')) {

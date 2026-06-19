@@ -66,7 +66,7 @@
                     @endphp
                     <td>{{ $mkName }}</td>
                     <td>{{ $jadwal->prodi->name ?? 'N/A' }}</td>
-                    <td class="text-center">{{ $jadwal->evaluations->count() }}</td>
+                    <td class="text-center">{{ $jadwal->evaluations_count }}</td>
                 </tr>
             @empty
                 <tr>

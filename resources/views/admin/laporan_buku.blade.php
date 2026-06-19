@@ -207,8 +207,30 @@
     <!-- BAB III & TABLE -->
     <div class="page">
         <div class="chapter-title">BAB III<br>HASIL EVALUASI</div>
-        @if(!empty($config['bab3']))
-            <div class="content-text mb-4">{!! $config['bab3'] !!}</div>
+        @php
+            $bab3Content = $config['bab3'] ?? '';
+            $hasPieChart = str_contains($bab3Content, '[PIE_CHART_DOSEN]');
+            $dosenLabels = [];
+            $dosenData = [];
+            
+            if ($hasPieChart) {
+                $dosenStats = [];
+                foreach($jadwals as $j) {
+                    $name = $j->dosen->name ?? 'Unknown';
+                    if (!isset($dosenStats[$name])) {
+                        $dosenStats[$name] = 0;
+                    }
+                    $dosenStats[$name] += $j->evaluations->count();
+                }
+                $dosenLabels = array_keys($dosenStats);
+                $dosenData = array_values($dosenStats);
+
+                $pieChartHtml = '<div style="width: 70%; margin: 30px auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);"><h4 style="text-align: center; margin-bottom: 20px; font-size: 14pt;">Proporsi Responden Berdasarkan Dosen</h4><canvas id="dosenPieChart"></canvas></div>';
+                $bab3Content = str_replace('[PIE_CHART_DOSEN]', $pieChartHtml, $bab3Content);
+            }
+        @endphp
+        @if(!empty($bab3Content))
+            <div class="content-text mb-4">{!! $bab3Content !!}</div>
         @endif
 
         <table class="book-table" style="font-size: 8pt;">
@@ -219,14 +241,14 @@
                     <th rowspan="2" style="width: 18%; vertical-align: middle;">Mata Kuliah</th>
                     <th rowspan="2" style="width: 11%; vertical-align: middle;">Program Studi</th>
                     <th rowspan="2" style="width: 4%; vertical-align: middle;">Resp.</th>
-                    <th colspan="3" style="text-align: center;">Kategori (Rata-Rata)</th>
-                    <th rowspan="2" style="width: 8%; vertical-align: middle;">Total Nilai</th>
-                    <th rowspan="2" style="width: 11%; vertical-align: middle;">Predikat</th>
+                    <th colspan="3" style="text-align: center;">Aspek Penilaian dan Hasil Penilaian</th>
+                    <th rowspan="2" style="width: 8%; vertical-align: middle;">Nilai</th>
+                    <th rowspan="2" style="width: 11%; vertical-align: middle;">Kategori</th>
                 </tr>
                 <tr>
-                    <th style="width: 9%; vertical-align: middle;">Proses Belajar</th>
-                    <th style="width: 9%; vertical-align: middle;">Kapabilitas</th>
-                    <th style="width: 9%; vertical-align: middle;">Sarpras</th>
+                    <th style="width: 9%; vertical-align: middle;">PBM</th>
+                    <th style="width: 9%; vertical-align: middle;">KKD</th>
+                    <th style="width: 9%; vertical-align: middle;">KSP</th>
                 </tr>
             </thead>
             <tbody>
@@ -272,6 +294,13 @@
                 @endforelse
             </tbody>
         </table>
+        
+        <div style="margin-top: 15px; font-size: 10pt; line-height: 1.5;">
+            <strong>Keterangan :</strong><br>
+            PBM = Proses Belajar Mengajar<br>
+            KKD = Kapabilitas Kompetensi Dosen<br>
+            KSP = Ketersediaan Sarana Prasarana
+        </div>
     </div>
 
     <!-- BAB IV -->
@@ -463,6 +492,50 @@
 
             tocHtml += '</div>';
             autoToc.innerHTML = tocHtml;
+        }
+
+        // Render Pie Chart if element exists
+        var ctxDosen = document.getElementById('dosenPieChart');
+        if (ctxDosen) {
+            var dosenLabels = {!! json_encode($dosenLabels ?? []) !!};
+            var dosenData = {!! json_encode($dosenData ?? []) !!};
+            
+            new Chart(ctxDosen, {
+                type: 'pie',
+                data: {
+                    labels: dosenLabels,
+                    datasets: [{
+                        data: dosenData,
+                        backgroundColor: [
+                            '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', 
+                            '#858796', '#5a5c69', '#2e59d9', '#17a673', '#2c9faf'
+                        ],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed !== null) {
+                                        label += context.parsed + ' responden';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
         }
     });
 </script>

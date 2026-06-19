@@ -362,12 +362,16 @@ class AdminController extends Controller
             'daftar_isi' => '',
             'bab1' => '',
             'bab2' => '',
-            'bab3' => $defaultBab3,
+            'bab3' => '',
             'bab4' => '',
             'bab5' => '',
             'lampiran' => '',
             'cover' => ''
         ];
+
+        if (empty($config['bab3'])) {
+            $config['bab3'] = $defaultBab3;
+        }
 
         return view('admin.laporan', compact('jadwals', 'filterPeriodes', 'prodis', 'config'));
     }
@@ -489,6 +493,14 @@ class AdminController extends Controller
         $configPath = storage_path("app/report_config_{$prodiStr}.json");
         $config = file_exists($configPath) ? json_decode(file_get_contents($configPath), true) : [];
         $prodis = \App\Models\Prodi::orderBy('name')->get();
+
+        if (empty($config['bab3'])) {
+            $defaultProdiName = $request->prodi_id ? ($prodis->firstWhere('id', $request->prodi_id)->name ?? 'Ilmu Komputer') : 'Ilmu Komputer Fakultas Ilmu Komputer Universitas Sumatera Selatan';
+            $defaultPeriodeName = $request->periode ?? 'November 2020';
+            $defaultTotalResponden = \App\Models\Evaluation::whereIn('jadwal_id', $jadwals->pluck('id'))->count();
+            $defaultTotalDosen = $jadwals->unique('dosen_id')->count();
+            $config['bab3'] = "<p>Survey Kepuasan Mahasiswa Terhadap Dosen dalam Pengajaran Program Studi {$defaultProdiName} dilakukan pada bulan {$defaultPeriodeName} dengan menyebarkan kuesioner secara online. Penyebaran kuesioner dilakukan melalui SIMAK dengan menggunakan google drive. Hasil survey diperoleh jumlah responden yang memberikan jawaban sebanyak {$defaultTotalResponden} responden dalam hal ini mahasiswa Program Studi {$defaultProdiName}.</p><p><strong>Dosen Objek Survey</strong><br>Jumlah Dosen Prodi {$defaultProdiName} yang disurvey sebanyak {$defaultTotalDosen} orang. Kelompok Dosen digambarkan pada grafik berikut.</p><p>[PIE_CHART_DOSEN]</p><p><strong>Penilaian terhadap Kinerja Dosen dalam Proses Belajar Mengajar, Kapabilitas/ Kompetensi Dosen dan Ketersediaan Sarana Prasaran</strong><br>Hasil survey Kepuasan Mahasiswa terhadap Kapabilitas/ Kompetensi Dosen dan Ketersediaan Sarana Prasaran memperlihatkan bahwa secara umum Dosen Program Studi {$defaultProdiName} melaksanakan proses pembelajaran Sangat Baik.</p><p><strong>Tabulasi Penilaian Kepuasan Mahasiswa terhadap Dosen dalam Pembelajaran</strong></p>";
+        }
 
         $questions = \App\Models\Question::where('is_active', true)->orderBy('section')->orderBy('order_num')->get();
 

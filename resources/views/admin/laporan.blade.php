@@ -26,7 +26,6 @@
             .badge { border: 1px solid #000; color: #000 !important; background: transparent !important; }
         }
     </style>
-    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
 </head>
 <body>
 
@@ -296,30 +295,32 @@
 </div>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"></script>
 <script>
-    $(document).ready(function() {
-        $('textarea').summernote({
-            height: 250,
-            tabsize: 2,
-            toolbar: [
-                ['history', ['undo', 'redo']],
-                ['style', ['style']],
-                ['font', ['bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', 'clear']],
-                ['fontname', ['fontname']],
-                ['fontsize', ['fontsize']],
-                ['color', ['color']],
-                ['para', ['ul', 'ol', 'paragraph']],
-                ['height', ['height']],
-                ['table', ['table']],
-                ['insert', ['link', 'picture', 'video', 'hr']],
-                ['view', ['fullscreen', 'codeview', 'help']]
-            ]
-        });
-        
-        // Fix for summernote in bootstrap tabs
-        $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
-            $('.note-editor').trigger('resize');
+    document.addEventListener("DOMContentLoaded", function() {
+        tinymce.init({
+            selector: 'textarea',
+            height: 350,
+            menubar: true,
+            plugins: [
+                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                'insertdatetime', 'media', 'table', 'help', 'wordcount'
+            ],
+            toolbar: 'undo redo | blocks fontfamily fontsize | ' +
+                     'bold italic underline strikethrough superscript subscript | ' +
+                     'alignleft aligncenter alignright alignjustify | ' +
+                     'bullist numlist outdent indent | ' +
+                     'forecolor backcolor removeformat | ' +
+                     'table image media link hr | ' +
+                     'fullscreen preview code help',
+            branding: false,
+            promotion: false,
+            setup: function (editor) {
+                editor.on('change', function () {
+                    editor.save();
+                });
+            }
         });
     });
 </script>

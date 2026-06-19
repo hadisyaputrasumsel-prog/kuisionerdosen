@@ -422,9 +422,17 @@
 
     <!-- BAB V -->
     @if(!empty($config['bab5']))
+    @php
+        $bab5Content = $config['bab5'];
+        $bab5Content = str_replace(
+            ['[NAMA_PRODI]', '[PERIODE]', '[RATA_RATA_PREDIKAT]', '[TOTAL_RESPONDEN]', '[TOTAL_DOSEN]', '[SKOR_PBM]', '[PREDIKAT_PBM]', '[SKOR_KKD]', '[PREDIKAT_KKD]', '[SKOR_KSP]', '[PREDIKAT_KSP]'],
+            [$activeProdiName, $activePeriodeName, $overallPredikat, $activeTotalResponden, $activeTotalDosen, number_format($overallAvgA, 1), $getPred($overallAvgA), number_format($overallAvgB, 1), $getPred($overallAvgB), number_format($overallAvgC, 1), $getPred($overallAvgC)],
+            $bab5Content
+        );
+    @endphp
     <div class="page">
         <div class="chapter-title">BAB V<br>KESIMPULAN DAN REKOMENDASI</div>
-        <div class="content-text">{!! $config['bab5'] !!}</div>
+        <div class="content-text">{!! $bab5Content !!}</div>
     </div>
     @endif
 

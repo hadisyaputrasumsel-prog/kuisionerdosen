@@ -488,12 +488,13 @@ class AdminController extends Controller
         $questions = \App\Models\Question::all();
         $qSectionMap = [];
         foreach ($questions as $q) {
+            $key = 'q_' . $q->id;
             if (strpos($q->section, 'A. PROSES') !== false) {
-                $qSectionMap[$q->id] = 'A';
+                $qSectionMap[$key] = 'A';
             } elseif (strpos($q->section, 'B. KAPABILITAS') !== false) {
-                $qSectionMap[$q->id] = 'B';
+                $qSectionMap[$key] = 'B';
             } elseif (strpos($q->section, 'C. KETERSEDIAAN') !== false) {
-                $qSectionMap[$q->id] = 'C';
+                $qSectionMap[$key] = 'C';
             }
         }
 

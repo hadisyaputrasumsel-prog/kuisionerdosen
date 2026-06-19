@@ -257,10 +257,11 @@
             elseif ($overallAvgScore >= 1.5) $overallPredikat = 'Kurang';
 
             $bab3Content = str_replace(
-                ['[NAMA_PRODI]', '[PERIODE]', '[TOTAL_RESPONDEN]', '[TOTAL_DOSEN]', '[RATA_RATA_PREDIKAT]'],
-                [$activeProdiName, $activePeriodeName, $activeTotalResponden, $activeTotalDosen, $overallPredikat],
+                ['[NAMA_PRODI]', '[PERIODE]', '[TOTAL_RESPONDEN]', '[TOTAL_DOSEN]', '[RATA_RATA_PREDIKAT]', '[GRAFIK_INSTRUMEN]', '[TABEL_EVALUASI]'],
+                [$activeProdiName, $activePeriodeName, $activeTotalResponden, $activeTotalDosen, $overallPredikat, '', ''],
                 $bab3Content
             );
+            $bab3Content = str_replace('<p></p>', '', $bab3Content);
         @endphp
         @if(!empty($bab3Content))
             <div class="content-text mb-4">{!! $bab3Content !!}</div>
@@ -334,6 +335,52 @@
             KKD = Kapabilitas Kompetensi Dosen<br>
             KSP = Ketersediaan Sarana Prasarana
         </div>
+
+        @php
+            $questionTallies = [];
+            foreach($questions as $q) {
+                $questionTallies[$q->id] = [1=>0, 2=>0, 3=>0, 4=>0, 5=>0];
+            }
+
+            foreach($jadwals as $j) {
+                foreach($j->evaluations as $eval) {
+                    $answers = is_string($eval->answers) ? json_decode($eval->answers, true) : $eval->answers;
+                    if(is_array($answers)) {
+                        foreach($answers as $qId => $score) {
+                            if(isset($questionTallies[$qId][$score])) {
+                                $questionTallies[$qId][$score]++;
+                            }
+                        }
+                    }
+                }
+            }
+            $groupedQuestions = $questions->groupBy('section');
+        @endphp
+
+        @if(str_contains($config['bab3'] ?? '', '[GRAFIK_INSTRUMEN]') || empty($config['bab3']))
+        <div style="page-break-before: always; margin-top: 30px;">
+            <div class="content-text mb-4">
+                <p>Berikut diagram survey Kepuasan Mahasiswa terhadap Dosen dalam Pembelajaran :</p>
+            </div>
+            
+            @foreach($groupedQuestions as $sectionName => $qs)
+                <div style="margin-bottom: 40px; border: 1px solid #ccc; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); page-break-inside: avoid;">
+                    <h4 style="background-color: #673ab7; color: white; padding: 10px 15px; border-radius: 5px; font-size: 12pt; margin-top: 0;">{{ $sectionName }}</h4>
+                    
+                    @foreach($qs as $q)
+                        <div style="margin-top: 20px; margin-bottom: 30px; page-break-inside: avoid;">
+                            <p style="font-size: 11pt; margin-bottom: 5px;">{{ $q->order_num }}. {{ $q->question_text }}</p>
+                            <p style="font-size: 9pt; color: #666; margin-bottom: 10px;">{{ $activeTotalResponden }} jawaban</p>
+                            
+                            <div style="position: relative; height: 250px; width: 100%;">
+                                <canvas id="barChart_{{ $q->id }}"></canvas>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @endforeach
+        </div>
+        @endif
     </div>
 
     <!-- BAB IV -->
@@ -597,6 +644,71 @@
                 }
             });
         }
+
+        // Render Bar Charts for Instruments
+        var questionTallies = {!! json_encode($questionTallies ?? []) !!};
+        Object.keys(questionTallies).forEach(function(qId) {
+            var ctxBar = document.getElementById('barChart_' + qId);
+            if (ctxBar) {
+                var tallies = questionTallies[qId];
+                var dataArr = [tallies[1]||0, tallies[2]||0, tallies[3]||0, tallies[4]||0, tallies[5]||0];
+                new Chart(ctxBar, {
+                    type: 'bar',
+                    plugins: [ChartDataLabels],
+                    data: {
+                        labels: [['1', 'Sangat Kurang'], '2', '3', '4', ['5', 'Sangat Baik']],
+                        datasets: [{
+                            data: dataArr,
+                            backgroundColor: '#673ab7',
+                            barPercentage: 0.6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        layout: {
+                            padding: { top: 30 }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            datalabels: {
+                                color: function(context) {
+                                    return context.dataset.data[context.dataIndex] > 0 ? '#fff' : '#666';
+                                },
+                                anchor: function(context) {
+                                    return context.dataset.data[context.dataIndex] > 0 ? 'end' : 'end';
+                                },
+                                align: function(context) {
+                                    return context.dataset.data[context.dataIndex] > 0 ? 'bottom' : 'top';
+                                },
+                                offset: function(context) {
+                                    return context.dataset.data[context.dataIndex] > 0 ? 5 : 5;
+                                },
+                                formatter: (value, ctx) => {
+                                    let sum = 0;
+                                    let dArr = ctx.chart.data.datasets[0].data;
+                                    dArr.map(data => { sum += data; });
+                                    let pct = sum > 0 ? (value * 100 / sum).toFixed(1) : 0;
+                                    return value + ' (' + pct + '%)';
+                                },
+                                font: { size: 10 },
+                                textAlign: 'center'
+                            }
+                        },
+                        scales: {
+                            y: { 
+                                beginAtZero: true, 
+                                suggestedMax: Math.max(...dataArr) > 0 ? Math.max(...dataArr) * 1.2 : 10,
+                                ticks: { stepSize: 20 }
+                            },
+                            x: {
+                                grid: { display: false }
+                            }
+                        }
+                    }
+                });
+            }
+        });
     });
 </script>
 

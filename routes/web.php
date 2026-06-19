@@ -21,6 +21,7 @@ Route::prefix('admin')->group(function () {
     Route::post('/periode', [AdminController::class, 'storePeriode'])->name('admin.periode.store');
     Route::post('/periode/{id}/toggle', [AdminController::class, 'togglePeriode'])->name('admin.periode.toggle');
     Route::get('/laporan', [AdminController::class, 'laporan'])->name('admin.laporan');
+    Route::get('/laporan/cetak-tabel', [AdminController::class, 'cetakTabel'])->name('admin.laporan.cetak-tabel');
     Route::post('/laporan/config', [AdminController::class, 'saveLaporanConfig'])->name('admin.laporan.config');
     Route::get('/laporan/preview', [AdminController::class, 'previewLaporan'])->name('admin.laporan.preview');
     

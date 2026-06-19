@@ -376,6 +376,38 @@ class AdminController extends Controller
         return view('admin.laporan', compact('jadwals', 'filterPeriodes', 'prodis', 'config'));
     }
 
+    public function cetakTabel(Request $request)
+    {
+        if (!$request->has('periode')) {
+            $activePeriode = \App\Models\Periode::where('is_active', true)->first()->name ?? null;
+            if ($activePeriode) {
+                $request->merge(['periode' => $activePeriode]);
+            }
+        }
+
+        $query = \App\Models\Jadwal::with(['dosen', 'mataKuliah', 'prodi', 'evaluations'])
+            ->join('dosens', 'jadwals.dosen_id', '=', 'dosens.id')
+            ->select('jadwals.*')
+            ->has('evaluations')
+            ->orderBy('dosens.name', 'asc');
+
+        if ($request->filled('periode')) {
+            $query->where('periode', $request->periode);
+        }
+        if ($request->filled('prodi_id')) {
+            $query->where('prodi_id', $request->prodi_id);
+        }
+
+        $jadwals = $query->get();
+
+        $prodi = null;
+        if ($request->filled('prodi_id')) {
+            $prodi = \App\Models\Prodi::find($request->prodi_id);
+        }
+
+        return view('admin.laporan_cetak_tabel', compact('jadwals', 'request', 'prodi'));
+    }
+
     public function saveLaporanConfig(Request $request)
     {
         $request->validate([

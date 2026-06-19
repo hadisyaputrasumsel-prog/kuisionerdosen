@@ -81,7 +81,10 @@
     <div class="flex-grow-1 bg-light p-4 content-area" style="margin-left: 280px; min-height: 100vh;">
         
         <div class="d-flex justify-content-between align-items-center mb-4 no-print">
-            <h2 class="fw-bold text-dark mb-0">Cetak Laporan Hasil</h2>
+            <h2 class="fw-bold text-dark mb-0">Laporan Hasil</h2>
+            <a href="{{ route('admin.laporan.cetak-tabel', ['periode' => request('periode'), 'prodi_id' => request('prodi_id')]) }}" target="_blank" class="btn btn-primary shadow-sm fw-bold">
+                <i class="bi bi-printer-fill me-2"></i> Cetak Daftar Evaluasi
+            </a>
         </div>
 
         <ul class="nav nav-tabs mb-4 no-print" id="myTab" role="tablist">

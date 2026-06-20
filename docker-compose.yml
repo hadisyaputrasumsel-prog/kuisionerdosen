@@ -23,6 +23,9 @@ services:
       - db
     networks:
       - app-network
+    volumes:
+      - uploads-data:/var/www/html/public/uploads
+      - storage-data:/var/www/html/storage
 
   db:
     image: mariadb:10.6
@@ -36,6 +39,8 @@ services:
 
 volumes:
   db-data:
+  uploads-data:
+  storage-data:
 
 networks:
   app-network:

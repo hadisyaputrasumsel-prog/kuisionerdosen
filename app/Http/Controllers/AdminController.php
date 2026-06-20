@@ -416,8 +416,11 @@ class AdminController extends Controller
             'dokumentasi' => 'nullable|file|image|max:10240',
         ], [
             'cover.max' => 'Ukuran file Cover maksimal adalah 10MB.',
+            'cover.uploaded' => 'Gagal mengupload cover. Pastikan ukuran file tidak terlalu besar (maks 10MB).',
             'surat_tugas.max' => 'Ukuran file Surat Tugas maksimal adalah 10MB.',
+            'surat_tugas.uploaded' => 'Gagal mengupload Surat Tugas. Pastikan ukuran file tidak terlalu besar.',
             'dokumentasi.max' => 'Ukuran file Dokumentasi maksimal adalah 10MB.',
+            'dokumentasi.uploaded' => 'Gagal mengupload Dokumentasi. Pastikan ukuran file tidak terlalu besar.',
             'image' => 'File yang diupload harus berupa gambar (JPG/PNG).',
         ]);
 

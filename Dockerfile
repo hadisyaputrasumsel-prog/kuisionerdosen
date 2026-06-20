@@ -18,6 +18,9 @@ RUN apt-get update && apt-get install -y \
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Increase PHP upload limits
+RUN echo "upload_max_filesize = 50M\npost_max_size = 50M" > /usr/local/etc/php/conf.d/uploads.ini
+
 # Install extensions
 RUN docker-php-ext-configure intl
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip intl

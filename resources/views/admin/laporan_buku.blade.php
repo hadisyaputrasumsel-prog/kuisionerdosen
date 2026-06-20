@@ -734,26 +734,19 @@
                         plugins: {
                             legend: { display: false },
                             datalabels: {
-                                color: function(context) {
-                                    return context.dataset.data[context.dataIndex] > 0 ? '#fff' : '#666';
-                                },
-                                anchor: function(context) {
-                                    return context.dataset.data[context.dataIndex] > 0 ? 'end' : 'end';
-                                },
-                                align: function(context) {
-                                    return context.dataset.data[context.dataIndex] > 0 ? 'bottom' : 'top';
-                                },
-                                offset: function(context) {
-                                    return context.dataset.data[context.dataIndex] > 0 ? 5 : 5;
-                                },
+                                color: '#333',
+                                anchor: 'end',
+                                align: 'top',
+                                offset: 4,
                                 formatter: (value, ctx) => {
+                                    if (value === 0) return '';
                                     let sum = 0;
                                     let dArr = ctx.chart.data.datasets[0].data;
                                     dArr.map(data => { sum += data; });
                                     let pct = sum > 0 ? (value * 100 / sum).toFixed(1) : 0;
                                     return value + ' (' + pct + '%)';
                                 },
-                                font: { size: 10 },
+                                font: { size: 10, weight: 'bold' },
                                 textAlign: 'center'
                             }
                         },

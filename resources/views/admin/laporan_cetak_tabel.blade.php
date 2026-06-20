@@ -28,11 +28,11 @@
     <div class="header-title">DAFTAR EVALUASI DOSEN OLEH MAHASISWA</div>
     <div class="header-subtitle">
         @if($prodi)
-            Program Studi: {{ $prodi->name }}<br>
+            Program Studi: {{ ucwords(strtolower($prodi->name)) }}<br>
         @else
             Seluruh Program Studi<br>
         @endif
-        Periode: {{ $request->periode ?? 'Semua Periode' }}
+        Periode: {{ $request->periode ? trim(str_ireplace('REGULER', '', $request->periode)) : 'Semua Periode' }}
     </div>
 
     <table class="table">
@@ -65,7 +65,7 @@
                         }
                     @endphp
                     <td>{{ $mkName }}</td>
-                    <td>{{ $jadwal->prodi->name ?? 'N/A' }}</td>
+                    <td>{{ ucwords(strtolower($jadwal->prodi->name ?? 'N/A')) }}</td>
                     <td class="text-center">{{ $jadwal->evaluations_count }}</td>
                 </tr>
             @empty

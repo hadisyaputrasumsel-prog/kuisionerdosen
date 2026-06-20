@@ -146,11 +146,11 @@
             
             <div style="font-size: 14pt; margin-top: 10px;">
                 @if(request('periode'))
-                    <div class="mb-2">Periode: {{ request('periode') }}</div>
+                    <div class="mb-2">Periode: {{ trim(str_ireplace('REGULER', '', request('periode'))) }}</div>
                 @endif
                 
                 @if(request('prodi_id'))
-                    <div class="fw-bold">TINGKAT PROGRAM STUDI: {{ strtoupper($prodis->firstWhere('id', request('prodi_id'))->name ?? '') }}</div>
+                    <div class="fw-bold">TINGKAT PROGRAM STUDI: {{ ucwords(strtolower($prodis->firstWhere('id', request('prodi_id'))->name ?? '')) }}</div>
                 @else
                     <div class="fw-bold">TINGKAT UNIVERSITAS</div>
                 @endif
@@ -242,8 +242,8 @@
             }
 
             // Replace Placeholders with Dynamic Values
-            $activeProdiName = request('prodi_id') ? ($prodis->firstWhere('id', request('prodi_id'))->name ?? 'Ilmu Komputer') : 'ILMU KOMPUTER Fakultas Ilmu Komputer Universitas Sumatera Selatan';
-            $activePeriodeName = request('periode') ?? 'saat ini';
+            $activeProdiName = request('prodi_id') ? ucwords(strtolower($prodis->firstWhere('id', request('prodi_id'))->name ?? 'Ilmu Komputer')) : 'Ilmu Komputer Fakultas Ilmu Komputer Universitas Sumatera Selatan';
+            $activePeriodeName = request('periode') ? trim(str_ireplace('REGULER', '', request('periode'))) : 'saat ini';
             $activeTotalResponden = 0;
             $overallTotalScore = 0;
             $overallTotalQuestions = 0;
@@ -315,7 +315,7 @@
                             }
                         @endphp
                         <td>{{ $mkName }}</td>
-                        <td style="text-align: center;">{{ $jadwal->prodi->name ?? 'N/A' }}</td>
+                        <td style="text-align: center;">{{ ucwords(strtolower($jadwal->prodi->name ?? 'N/A')) }}</td>
                         <td style="text-align: center;">{{ $jadwal->evaluations->count() }}</td>
                         <td style="text-align: center;">
                             <span style="font-size: 9pt;">{{ number_format($jadwal->avg_A, 1) }}</span>

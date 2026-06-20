@@ -147,7 +147,7 @@
                                         <td class="text-center text-muted border-0"><i class="bi bi-arrow-return-right"></i></td>
                                     @endif
                                     <td>{{ $jadwal->mataKuliah->name ?? 'N/A' }}</td>
-                                    <td><span class="badge bg-secondary">{{ $jadwal->prodi->name ?? 'N/A' }}</span></td>
+                                    <td><span class="badge bg-secondary">{{ ucwords(strtolower($jadwal->prodi->name ?? 'N/A')) }}</span></td>
                                     <td class="text-center">
                                         <span class="badge {{ $jadwal->evaluations_count > 0 ? 'bg-success' : 'bg-warning text-dark' }} rounded-pill px-3 py-2">
                                             {{ $jadwal->evaluations_count }} Mhs

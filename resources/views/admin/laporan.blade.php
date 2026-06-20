@@ -160,7 +160,7 @@
                                             @endphp
                                             <td>{{ $mkName }}</td>
                                             
-                                            <td><span class="badge bg-secondary bg-opacity-75 text-white fw-normal">{{ $jadwal->prodi->name ?? 'N/A' }}</span></td>
+                                            <td><span class="badge bg-secondary bg-opacity-75 text-white fw-normal">{{ ucwords(strtolower($jadwal->prodi->name ?? 'N/A')) }}</span></td>
                                             <td class="text-center fw-bold">{{ $jadwal->evaluations->count() }}</td>
                                             <td class="text-center">
                                                 <span class="badge bg-{{ $jadwal->average_score >= 3.5 ? 'success' : ($jadwal->average_score >= 2.5 ? 'warning' : 'danger') }} fs-6">
@@ -194,7 +194,7 @@
                     </div>
                     <div class="card-body">
                         <div class="alert alert-info border-0 shadow-sm mb-4">
-                            <i class="bi bi-info-circle-fill me-2"></i> Anda sedang mengedit konfigurasi untuk <strong>{{ request('prodi_id') ? 'Tingkat Program Studi: ' . ($prodis->firstWhere('id', request('prodi_id'))->name ?? '') : 'Tingkat Universitas' }}</strong>. Konfigurasi setiap tingkat disimpan secara terpisah.
+                            <i class="bi bi-info-circle-fill me-2"></i> Anda sedang mengedit konfigurasi untuk <strong>{{ request('prodi_id') ? 'Tingkat Program Studi: ' . ucwords(strtolower($prodis->firstWhere('id', request('prodi_id'))->name ?? '')) : 'Tingkat Universitas' }}</strong>. Konfigurasi setiap tingkat disimpan secara terpisah.
                         </div>
 
                         @if ($errors->any())

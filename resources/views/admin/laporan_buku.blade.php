@@ -237,7 +237,7 @@
                 $dosenLabels = array_keys($dosenStats);
                 $dosenData = array_values($dosenStats);
 
-                $pieChartHtml = '<div style="width: 85%; margin: 30px auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);"><h4 style="text-align: center; margin-bottom: 20px; font-size: 14pt;">Proporsi Responden Berdasarkan Dosen</h4><div style="position: relative; height: 400px; width: 100%; display: flex; justify-content: center;"><canvas id="dosenPieChart"></canvas></div></div>';
+                $pieChartHtml = '<div style="width: 100%; margin: 30px auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);"><h4 style="text-align: center; margin-bottom: 20px; font-size: 14pt;">Proporsi Responden Berdasarkan Dosen</h4><div style="position: relative; height: 500px; width: 100%; display: flex; justify-content: center;"><canvas id="dosenPieChart"></canvas></div></div>';
                 $bab3Content = str_replace('[PIE_CHART_DOSEN]', $pieChartHtml, $bab3Content);
             }
 
@@ -666,12 +666,13 @@
                             }
                         },
                         legend: {
-                            position: 'right',
+                            position: 'bottom',
                             labels: {
                                 font: {
                                     size: 11
                                 },
-                                padding: 15
+                                padding: 15,
+                                boxWidth: 15
                             }
                         },
                         tooltip: {

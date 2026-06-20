@@ -634,7 +634,14 @@
                             color: '#fff',
                             font: {
                                 weight: 'bold',
-                                size: 12
+                                size: 11
+                            },
+                            display: function(context) {
+                                let data = context.dataset.data;
+                                let value = data[context.dataIndex];
+                                let sum = data.reduce((a, b) => a + b, 0);
+                                let percentage = (value * 100 / sum);
+                                return percentage >= 4; // Hide label if < 4% to prevent overlap
                             },
                             formatter: (value, ctx) => {
                                 let sum = 0;

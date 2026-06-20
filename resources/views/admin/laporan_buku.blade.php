@@ -223,10 +223,21 @@
                     }
                     $dosenStats[$name] += $j->evaluations->count();
                 }
+                
+                arsort($dosenStats); // Urutkan dari responden terbanyak
+                
+                // Ambil top 10, sisanya gabung ke "Dosen Lainnya"
+                if (count($dosenStats) > 10) {
+                    $top10 = array_slice($dosenStats, 0, 10);
+                    $others = array_slice($dosenStats, 10);
+                    $top10['Dosen Lainnya (' . count($others) . ' Orang)'] = array_sum($others);
+                    $dosenStats = $top10;
+                }
+
                 $dosenLabels = array_keys($dosenStats);
                 $dosenData = array_values($dosenStats);
 
-                $pieChartHtml = '<div style="width: 85%; margin: 30px auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);"><h4 style="text-align: center; margin-bottom: 20px; font-size: 14pt;">Proporsi Responden Berdasarkan Dosen</h4><div style="position: relative; height: 350px; width: 100%; display: flex; justify-content: center;"><canvas id="dosenPieChart"></canvas></div></div>';
+                $pieChartHtml = '<div style="width: 85%; margin: 30px auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);"><h4 style="text-align: center; margin-bottom: 20px; font-size: 14pt;">Proporsi Responden Berdasarkan Dosen</h4><div style="position: relative; height: 400px; width: 100%; display: flex; justify-content: center;"><canvas id="dosenPieChart"></canvas></div></div>';
                 $bab3Content = str_replace('[PIE_CHART_DOSEN]', $pieChartHtml, $bab3Content);
             }
 
@@ -618,7 +629,8 @@
                         data: dosenData,
                         backgroundColor: [
                             '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', 
-                            '#858796', '#5a5c69', '#2e59d9', '#17a673', '#2c9faf'
+                            '#858796', '#5a5c69', '#2e59d9', '#17a673', '#2c9faf',
+                            '#d1d3e2' // Warna tambahan untuk 'Dosen Lainnya'
                         ],
                         hoverOffset: 4
                     }]

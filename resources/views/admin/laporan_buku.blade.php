@@ -241,8 +241,8 @@
                 $bab3Content = str_replace('[PIE_CHART_DOSEN]', $pieChartHtml, $bab3Content);
             }
 
-            // Replace Placeholders with Dynamic Values
-            $activeProdiName = request('prodi_id') ? ucwords(strtolower($prodis->firstWhere('id', request('prodi_id'))->name ?? 'Ilmu Komputer')) : 'Ilmu Komputer Fakultas Ilmu Komputer Universitas Sumatera Selatan';
+            $isUniv = empty(request('prodi_id'));
+            $activeProdiName = $isUniv ? 'Universitas Sumatera Selatan' : ucwords(strtolower($prodis->firstWhere('id', request('prodi_id'))->name ?? 'Ilmu Komputer'));
             $activePeriodeName = request('periode') ? trim(str_ireplace('REGULER', '', request('periode'))) : 'saat ini';
             $activeTotalResponden = 0;
             $overallTotalScore = 0;
@@ -266,6 +266,10 @@
             elseif ($overallAvgScore >= 3.5) $overallPredikat = 'Baik';
             elseif ($overallAvgScore >= 2.5) $overallPredikat = 'Cukup';
             elseif ($overallAvgScore >= 1.5) $overallPredikat = 'Kurang';
+
+            if ($isUniv) {
+                $bab3Content = str_ireplace(['Program Studi [NAMA_PRODI]', 'Prodi [NAMA_PRODI]'], ['[NAMA_PRODI]', '[NAMA_PRODI]'], $bab3Content);
+            }
 
             $bab3Content = str_replace(
                 ['[NAMA_PRODI]', '[PERIODE]', '[TOTAL_RESPONDEN]', '[TOTAL_DOSEN]', '[RATA_RATA_PREDIKAT]', '[GRAFIK_INSTRUMEN]', '[TABEL_EVALUASI]'],
@@ -397,6 +401,10 @@
             return 'Sangat Kurang';
         };
 
+        if (empty(request('prodi_id'))) {
+            $bab4Content = str_ireplace(['Program Studi [NAMA_PRODI]', 'Prodi [NAMA_PRODI]'], ['[NAMA_PRODI]', '[NAMA_PRODI]'], $bab4Content);
+        }
+
         $bab4Content = str_replace(
             ['[NAMA_PRODI]', '[PERIODE]', '[RATA_RATA_PREDIKAT]', '[SKOR_PBM]', '[PREDIKAT_PBM]', '[SKOR_KKD]', '[PREDIKAT_KKD]', '[SKOR_KSP]', '[PREDIKAT_KSP]'],
             [$activeProdiName, $activePeriodeName, $overallPredikat, number_format($overallAvgA, 1), $getPred($overallAvgA), number_format($overallAvgB, 1), $getPred($overallAvgB), number_format($overallAvgC, 1), $getPred($overallAvgC)],
@@ -413,6 +421,11 @@
     @if(!empty($config['bab5']))
     @php
         $bab5Content = $config['bab5'];
+        if (empty(request('prodi_id'))) {
+            $bab5Content = str_ireplace(['Program Studi [NAMA_PRODI]', 'Prodi [NAMA_PRODI]'], ['[NAMA_PRODI]', '[NAMA_PRODI]'], $bab5Content);
+            $bab5Content = str_ireplace('Bagi Program Studi:', 'Bagi Fakultas/Universitas:', $bab5Content);
+        }
+
         $bab5Content = str_replace(
             ['[NAMA_PRODI]', '[PERIODE]', '[RATA_RATA_PREDIKAT]', '[TOTAL_RESPONDEN]', '[TOTAL_DOSEN]', '[SKOR_PBM]', '[PREDIKAT_PBM]', '[SKOR_KKD]', '[PREDIKAT_KKD]', '[SKOR_KSP]', '[PREDIKAT_KSP]'],
             [$activeProdiName, $activePeriodeName, $overallPredikat, $activeTotalResponden, $activeTotalDosen, number_format($overallAvgA, 1), $getPred($overallAvgA), number_format($overallAvgB, 1), $getPred($overallAvgB), number_format($overallAvgC, 1), $getPred($overallAvgC)],

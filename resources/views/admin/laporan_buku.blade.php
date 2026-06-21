@@ -133,12 +133,13 @@
             /* Remove padding from .page because @page margin will handle it */
             .page {
                 margin: 0 !important;
-                padding: 0 !important; 
+                padding: 0 0 1cm 0 !important; 
                 box-shadow: none;
                 page-break-after: always;
-                min-height: auto; 
+                min-height: 24.7cm !important; /* A4 height (29.7) minus top/bottom margins (2.5 * 2) */
                 height: auto !important;
                 position: relative;
+                box-sizing: border-box;
             }
             
             /* Generate Page Numbers */
@@ -148,7 +149,7 @@
             .page:not(.cover-full-page):not(.cover-page)::after {
                 content: counter(page_num);
                 position: absolute;
-                bottom: -1.5cm; /* Places it neatly within the @page bottom margin */
+                bottom: 0; /* Place inside the 1cm bottom padding */
                 right: 0;
                 font-family: Arial, sans-serif;
                 font-size: 11pt;

@@ -87,12 +87,12 @@
         }
 
         /* Ensure uploaded cover fills the A4 box on screen */
-        .page.cover-full-page {
+        #cover-page-wrapper {
             height: 29.7cm;
             padding: 0;
             overflow: hidden;
         }
-        .page.cover-full-page img {
+        #cover-page-img {
             width: 100%;
             height: 100%;
             object-fit: cover;
@@ -142,14 +142,16 @@
             }
 
             /* Fix cover image overflow in print */
-            .page.cover-full-page {
+            #cover-page-wrapper {
                 padding: 0 !important;
                 margin: 0 !important;
-            }
-            .page.cover-full-page img {
-                height: 29.7cm !important; /* force exact A4 height */
+                height: 100vh !important;
                 width: 100% !important;
-                object-fit: cover;
+            }
+            #cover-page-img {
+                height: 100vh !important;
+                width: 100% !important;
+                object-fit: cover !important;
             }
 
             /* Margin applied to every physical printed page */
@@ -179,8 +181,8 @@
 <div class="book-container">
 
     @if(!empty($config['cover']))
-    <div class="page cover-full-page" style="padding: 0 !important; height: 29.7cm !important; overflow: hidden !important;">
-        <img src="{{ asset($config['cover']) }}" alt="Cover Full" style="width: 100% !important; height: 100% !important; object-fit: cover !important; display: block !important;">
+    <div class="page cover-full-page" id="cover-page-wrapper">
+        <img src="{{ asset($config['cover']) }}" alt="Cover Full" id="cover-page-img">
     </div>
     @else
     <div class="page cover-page">

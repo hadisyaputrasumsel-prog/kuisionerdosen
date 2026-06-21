@@ -179,8 +179,8 @@
 <div class="book-container">
 
     @if(!empty($config['cover']))
-    <div class="page cover-full-page">
-        <img src="{{ asset($config['cover']) }}" alt="Cover Full">
+    <div class="page cover-full-page" style="padding: 0 !important; height: 29.7cm !important; overflow: hidden !important;">
+        <img src="{{ asset($config['cover']) }}" alt="Cover Full" style="width: 100% !important; height: 100% !important; object-fit: cover !important; display: block !important;">
     </div>
     @else
     <div class="page cover-page">

@@ -40,11 +40,22 @@ class AdminController extends Controller
             if ($request->filled('periode')) $q->where('periode', $request->periode);
         }])->get();
 
-        $topDosen = (clone $query)->with('dosen')
+        // Mengambil semua jadwal yang sesuai dengan filter beserta jumlah evaluasinya
+        $jadwals = (clone $query)->with('dosen')
             ->withCount('evaluations')
-            ->orderByDesc('evaluations_count')
-            ->take(5)
             ->get();
+
+        // Mengelompokkan berdasarkan dosen dan menjumlahkan semua evaluasi dari setiap jadwal dosen tersebut
+        $topDosen = $jadwals->groupBy('dosen_id')->map(function ($jadwalGroup) {
+            $dosen = $jadwalGroup->first()->dosen;
+            return (object)[
+                'dosen' => $dosen,
+                'evaluations_count' => $jadwalGroup->sum('evaluations_count')
+            ];
+        })
+        ->sortByDesc('evaluations_count')
+        ->take(5)
+        ->values();
 
         return view('admin.dashboard', compact('stats', 'jadwalPerProdi', 'topDosen', 'periodes'));
     }

@@ -116,10 +116,6 @@
             -webkit-print-color-adjust: exact;
         }
 
-        body {
-            counter-reset: page_num;
-        }
-
         @media print {
             body {
                 background: white;
@@ -140,19 +136,6 @@
                 height: auto !important;
                 position: relative;
                 box-sizing: border-box;
-            }
-            
-            /* Generate Page Numbers */
-            .page:not(.cover-full-page):not(.cover-page) {
-                counter-increment: page_num;
-            }
-            .page:not(.cover-full-page):not(.cover-page)::after {
-                content: counter(page_num);
-                position: absolute;
-                bottom: 0; /* Place inside the 1cm bottom padding */
-                right: 0;
-                font-family: Arial, sans-serif;
-                font-size: 11pt;
             }
 
             /* Add explicit padding back to the default cover page so text doesn't stick to the edge */

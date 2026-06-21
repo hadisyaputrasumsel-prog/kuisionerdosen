@@ -11,7 +11,11 @@ Route::get('/success', function() {
     return view('success');
 })->name('form.success');
 
-Route::prefix('admin')->group(function () {
+Route::get('/login', [App\Http\Controllers\AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [App\Http\Controllers\AuthController::class, 'login']);
+Route::post('/logout', [App\Http\Controllers\AuthController::class, 'logout'])->name('logout');
+
+Route::prefix('admin')->middleware('auth')->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('admin.dashboard');
     Route::get('/sinkron', [AdminController::class, 'sinkron'])->name('admin.sinkron');
     Route::get('/jadwal', [AdminController::class, 'jadwal'])->name('admin.jadwal');

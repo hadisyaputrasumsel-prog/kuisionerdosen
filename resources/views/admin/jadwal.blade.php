@@ -66,6 +66,14 @@
                     <i class="bi bi-box-arrow-up-right me-3 fs-5"></i> <span>Lihat Form Mahasiswa</span>
                 </a>
             </li>
+            <li class="nav-item w-100 mt-2">
+                <form action="{{ route('logout') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="nav-link text-white sidebar-link d-flex align-items-center w-100 text-start bg-transparent border-0 text-danger" style="opacity: 0.8; padding-top: 1rem; padding-bottom: 1rem;">
+                        <i class="bi bi-box-arrow-left me-3 fs-5"></i> <span>Logout</span>
+                    </button>
+                </form>
+            </li>
         </ul>
         <div class="mt-auto pt-3 text-center text-white-50 small opacity-50">
             &copy; 2026 Univ Sumatera Selatan

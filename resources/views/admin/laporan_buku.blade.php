@@ -112,26 +112,42 @@
             }
             .controls { display: none; }
             .book-container { max-width: none; width: 100%; margin: 0; padding: 0; }
+            
+            /* Remove padding from .page because @page margin will handle it */
             .page {
                 margin: 0 !important;
-                padding: 2cm !important; /* adjust for print safe area */
+                padding: 0 !important; 
                 box-shadow: none;
                 page-break-after: always;
-                min-height: auto; /* let content dictate height in print to avoid overflow */
+                min-height: auto; 
                 height: auto !important;
             }
-            /* Remove margins for printing to allow browser to handle A4 */
-            @page {
-                size: A4;
-                margin: 0mm; /* strictly no margin at page level */
+            
+            /* Add explicit padding back to the default cover page so text doesn't stick to the edge */
+            .page.cover-page {
+                padding: 4cm 2cm !important;
             }
+
             /* Fix cover image overflow in print */
             .page.cover-full-page {
                 padding: 0 !important;
+                margin: 0 !important;
             }
             .page.cover-full-page img {
                 height: 29.7cm !important; /* force exact A4 height */
-                object-fit: contain;
+                width: 100% !important;
+                object-fit: cover;
+            }
+
+            /* Margin applied to every physical printed page */
+            @page {
+                size: A4;
+                margin: 2.5cm;
+            }
+
+            /* Remove margin only for the very first page (Cover) */
+            @page :first {
+                margin: 0mm;
             }
         }
     </style>

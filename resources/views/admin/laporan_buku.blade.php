@@ -260,34 +260,48 @@
             $dosenLabels = [];
             $dosenData = [];
             
+            $isUniv = empty(request('prodi_id'));
+
             if ($hasPieChart) {
-                $dosenStats = [];
-                foreach($jadwals as $j) {
-                    $name = $j->dosen->name ?? 'Unknown';
-                    if (!isset($dosenStats[$name])) {
-                        $dosenStats[$name] = 0;
+                $pieStats = [];
+                
+                if ($isUniv) {
+                    foreach($jadwals as $j) {
+                        $name = $j->prodi->name ?? 'Unknown';
+                        if (!isset($pieStats[$name])) {
+                            $pieStats[$name] = 0;
+                        }
+                        $pieStats[$name] += $j->evaluations->count();
                     }
-                    $dosenStats[$name] += $j->evaluations->count();
+                } else {
+                    foreach($jadwals as $j) {
+                        $name = $j->dosen->name ?? 'Unknown';
+                        if (!isset($pieStats[$name])) {
+                            $pieStats[$name] = 0;
+                        }
+                        $pieStats[$name] += $j->evaluations->count();
+                    }
                 }
                 
-                arsort($dosenStats); // Urutkan dari responden terbanyak
+                arsort($pieStats); // Urutkan dari responden terbanyak
                 
-                // Ambil top 10, sisanya gabung ke "Dosen Lainnya"
-                if (count($dosenStats) > 10) {
-                    $top10 = array_slice($dosenStats, 0, 10);
-                    $others = array_slice($dosenStats, 10);
-                    $top10['Dosen Lainnya (' . count($others) . ' Orang)'] = array_sum($others);
-                    $dosenStats = $top10;
+                // Ambil top 10, sisanya gabung ke "Lainnya"
+                if (count($pieStats) > 10) {
+                    $top10 = array_slice($pieStats, 0, 10);
+                    $others = array_slice($pieStats, 10);
+                    $labelLainnya = $isUniv ? 'Prodi Lainnya (' . count($others) . ' Prodi)' : 'Dosen Lainnya (' . count($others) . ' Orang)';
+                    $top10[$labelLainnya] = array_sum($others);
+                    $pieStats = $top10;
                 }
 
-                $dosenLabels = array_keys($dosenStats);
-                $dosenData = array_values($dosenStats);
+                $dosenLabels = array_keys($pieStats);
+                $dosenData = array_values($pieStats);
 
-                $pieChartHtml = '<div style="width: 100%; margin: 30px auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);"><h4 style="text-align: center; margin-bottom: 20px; font-size: 14pt;">Proporsi Responden Berdasarkan Dosen</h4><div style="position: relative; height: 500px; width: 100%; display: flex; justify-content: center;"><canvas id="dosenPieChart"></canvas></div></div>';
+                $chartTitle = $isUniv ? 'Proporsi Responden Berdasarkan Program Studi' : 'Proporsi Responden Berdasarkan Dosen';
+
+                $pieChartHtml = '<div style="width: 100%; margin: 30px auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);"><h4 style="text-align: center; margin-bottom: 20px; font-size: 14pt;">' . $chartTitle . '</h4><div style="position: relative; height: 500px; width: 100%; display: flex; justify-content: center;"><canvas id="dosenPieChart"></canvas></div></div>';
                 $bab3Content = str_replace('[PIE_CHART_DOSEN]', $pieChartHtml, $bab3Content);
             }
-
-            $isUniv = empty(request('prodi_id'));
             $activeProdiName = $isUniv ? 'Universitas Sumatera Selatan' : ucwords(strtolower($prodis->firstWhere('id', request('prodi_id'))->name ?? 'Ilmu Komputer'));
             $activePeriodeName = request('periode') ? trim(str_ireplace('REGULER', '', request('periode'))) : 'saat ini';
             $activeTotalResponden = 0;

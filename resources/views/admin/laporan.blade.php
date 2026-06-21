@@ -245,6 +245,20 @@
                                     </div>
                                 </div>
 
+                                <!-- Lembar Pengesahan -->
+                                <div class="accordion-item mb-2 border rounded">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#colLembarPengesahan">
+                                            LEMBAR PENGESAHAN
+                                        </button>
+                                    </h2>
+                                    <div id="colLembarPengesahan" class="accordion-collapse collapse">
+                                        <div class="accordion-body bg-light">
+                                            <textarea name="lembar_pengesahan" class="form-control" rows="4" placeholder="Tuliskan isi lembar pengesahan di sini (bisa gunakan editor TinyMCE)...">{{ $config['lembar_pengesahan'] ?? '' }}</textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <!-- BAB I -->
                                 <div class="accordion-item mb-2 border rounded">
                                     <h2 class="accordion-header">

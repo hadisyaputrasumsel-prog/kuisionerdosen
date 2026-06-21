@@ -116,6 +116,10 @@
             -webkit-print-color-adjust: exact;
         }
 
+        body {
+            counter-reset: page_num;
+        }
+
         @media print {
             body {
                 background: white;
@@ -134,8 +138,22 @@
                 page-break-after: always;
                 min-height: auto; 
                 height: auto !important;
+                position: relative;
             }
             
+            /* Generate Page Numbers */
+            .page:not(.cover-full-page):not(.cover-page) {
+                counter-increment: page_num;
+            }
+            .page:not(.cover-full-page):not(.cover-page)::after {
+                content: counter(page_num);
+                position: absolute;
+                bottom: -1.5cm; /* Places it neatly within the @page bottom margin */
+                right: 0;
+                font-family: Arial, sans-serif;
+                font-size: 11pt;
+            }
+
             /* Add explicit padding back to the default cover page so text doesn't stick to the edge */
             .page.cover-page {
                 padding: 4cm 2cm !important;
@@ -216,6 +234,14 @@
             UNIVERSITAS SUMATERA SELATAN<br>
             TAHUN {{ date('Y') }}
         </div>
+    </div>
+    @endif
+
+    <!-- LEMBAR PENGESAHAN -->
+    @if(!empty($config['lembar_pengesahan']))
+    <div class="page">
+        <div class="chapter-title">LEMBAR PENGESAHAN</div>
+        <div class="content-text">{!! $config['lembar_pengesahan'] !!}</div>
     </div>
     @endif
 

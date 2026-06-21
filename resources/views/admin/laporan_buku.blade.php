@@ -544,8 +544,10 @@
                         <p style="font-size: 11pt; margin-bottom: 5px;">{{ $q->order_num }}. {{ $q->question_text }}</p>
                         <p style="font-size: 9pt; color: #666; margin-bottom: 10px;">{{ $activeTotalResponden }} jawaban</p>
                         
-                        <div style="position: relative; height: 250px; width: 100%;">
-                            <canvas id="barChart_{{ $q->id }}"></canvas>
+                        <div style="display: flex; justify-content: center; width: 100%;">
+                            <div style="position: relative; height: 250px; width: 80%;">
+                                <canvas id="barChart_{{ $q->id }}"></canvas>
+                            </div>
                         </div>
                     </div>
                 @endforeach

@@ -497,7 +497,7 @@
         <div class="chapter-title">LAMPIRAN 2<br>GRAFIK HASIL SURVEI INSTRUMEN</div>
         
         @foreach($groupedQuestions as $sectionName => $qs)
-            <div style="margin-top: 20px; margin-bottom: 40px; border: 1px solid #ccc; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); page-break-inside: avoid;">
+            <div style="margin-top: 20px; margin-bottom: 40px; border: 1px solid #ccc; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
                 <h4 style="background-color: #673ab7; color: white; padding: 10px 15px; border-radius: 5px; font-size: 12pt; margin-top: 0;">{{ $sectionName }}</h4>
                 
                 @foreach($qs as $q)

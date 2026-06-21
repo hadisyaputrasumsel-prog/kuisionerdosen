@@ -85,6 +85,19 @@
             font-weight: bold;
             margin-bottom: 30px;
         }
+
+        /* Ensure uploaded cover fills the A4 box on screen */
+        .page.cover-full-page {
+            height: 29.7cm;
+            padding: 0;
+            overflow: hidden;
+        }
+        .page.cover-full-page img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
         
         /* Table styling for book */
         .book-table {
@@ -166,8 +179,8 @@
 <div class="book-container">
 
     @if(!empty($config['cover']))
-    <div class="page cover-full-page" style="padding: 0; overflow: hidden;">
-        <img src="{{ asset($config['cover']) }}" alt="Cover Full" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+    <div class="page cover-full-page">
+        <img src="{{ asset($config['cover']) }}" alt="Cover Full">
     </div>
     @else
     <div class="page cover-page">

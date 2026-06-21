@@ -103,6 +103,17 @@ class AdminController extends Controller
         return redirect()->back()->with('success', 'Jadwal berhasil dihapus.');
     }
 
+    public function saran($id)
+    {
+        $jadwal = \App\Models\Jadwal::with(['dosen', 'mataKuliah', 'prodi'])->findOrFail($id);
+        $evaluations = \App\Models\Evaluation::where('jadwal_id', $id)
+            ->whereNotNull('saran')
+            ->where('saran', '!=', '')
+            ->get();
+            
+        return view('admin.saran', compact('jadwal', 'evaluations'));
+    }
+
     public function togglePeriode(Request $request, $id)
     {
         $periode = \App\Models\Periode::findOrFail($id);

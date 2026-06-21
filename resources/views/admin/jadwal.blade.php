@@ -155,13 +155,18 @@
                                     </td>
                                     <td><span class="badge bg-info text-dark">{{ $jadwal->periode ?? 'Semester Aktif' }}</span></td>
                                     <td class="text-center">
-                                        <form action="{{ route('admin.jadwal.destroy', $jadwal->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus jadwal ini? Data kuisioner terkait jadwal ini juga akan terhapus.');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Hapus Jadwal">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </form>
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <a href="{{ route('admin.jadwal.saran', $jadwal->id) }}" class="btn btn-sm btn-outline-info" title="Lihat Saran Mahasiswa" target="_blank">
+                                                <i class="bi bi-chat-text"></i>
+                                            </a>
+                                            <form action="{{ route('admin.jadwal.destroy', $jadwal->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus jadwal ini? Data kuisioner terkait jadwal ini juga akan terhapus.');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Hapus Jadwal">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             @empty

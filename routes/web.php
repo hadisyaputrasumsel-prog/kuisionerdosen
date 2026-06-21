@@ -15,6 +15,7 @@ Route::prefix('admin')->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('admin.dashboard');
     Route::get('/sinkron', [AdminController::class, 'sinkron'])->name('admin.sinkron');
     Route::get('/jadwal', [AdminController::class, 'jadwal'])->name('admin.jadwal');
+    Route::get('/jadwal/{id}/saran', [AdminController::class, 'saran'])->name('admin.jadwal.saran');
     Route::delete('/jadwal/{id}', [AdminController::class, 'destroyJadwal'])->name('admin.jadwal.destroy');
     Route::post('/scrape/periods', [AdminController::class, 'getPeriods'])->name('admin.scrape.periods');
     Route::post('/scrape', [AdminController::class, 'scrapeData'])->name('admin.scrape');

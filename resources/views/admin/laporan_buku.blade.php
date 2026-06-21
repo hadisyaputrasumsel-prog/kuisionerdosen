@@ -20,6 +20,7 @@
             max-width: 21cm; /* A4 width */
         }
         .page {
+            box-sizing: border-box;
             background: white;
             width: 21cm;
             min-height: 29.7cm; /* A4 height */
@@ -27,6 +28,7 @@
             margin: 2cm auto;
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
             position: relative;
+            page-break-inside: avoid;
         }
         .controls {
             position: fixed;
@@ -105,18 +107,31 @@
             body {
                 background: white;
                 display: block;
+                margin: 0;
+                padding: 0;
             }
             .controls { display: none; }
-            .book-container { max-width: none; }
+            .book-container { max-width: none; width: 100%; margin: 0; padding: 0; }
             .page {
-                margin: 0;
+                margin: 0 !important;
+                padding: 2cm !important; /* adjust for print safe area */
                 box-shadow: none;
                 page-break-after: always;
+                min-height: auto; /* let content dictate height in print to avoid overflow */
+                height: auto !important;
             }
             /* Remove margins for printing to allow browser to handle A4 */
             @page {
                 size: A4;
-                margin: 0;
+                margin: 0mm; /* strictly no margin at page level */
+            }
+            /* Fix cover image overflow in print */
+            .page.cover-full-page {
+                padding: 0 !important;
+            }
+            .page.cover-full-page img {
+                height: 29.7cm !important; /* force exact A4 height */
+                object-fit: contain;
             }
         }
     </style>
@@ -135,7 +150,7 @@
 <div class="book-container">
 
     @if(!empty($config['cover']))
-    <div class="page" style="padding: 0; margin: 2cm auto; height: 29.7cm; overflow: hidden;">
+    <div class="page cover-full-page" style="padding: 0; overflow: hidden;">
         <img src="{{ asset($config['cover']) }}" alt="Cover Full" style="width: 100%; height: 100%; object-fit: cover; display: block;">
     </div>
     @else

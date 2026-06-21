@@ -480,6 +480,41 @@
             [$activeProdiName, $activePeriodeName, $overallPredikat, number_format($overallAvgA, 1), $getPred($overallAvgA), number_format($overallAvgB, 1), $getPred($overallAvgB), number_format($overallAvgC, 1), $getPred($overallAvgC)],
             $bab4Content
         );
+
+        // Generate dynamic analysis per instrument if placeholder exists
+        if (str_contains($bab4Content, '[ANALISIS_PER_INSTRUMEN]')) {
+            $analisisInstrumenHtml = '<div style="margin-top: 15px;">';
+            foreach($groupedQuestions as $sectionName => $qs) {
+                $analisisInstrumenHtml .= "<p style='margin-bottom:10px; font-weight: bold;'>Analisis Aspek {$sectionName}:</p><ul style='margin-bottom: 20px;'>";
+                foreach($qs as $q) {
+                    $tally = $questionTallies[$q->id] ?? [1=>0, 2=>0, 3=>0, 4=>0, 5=>0];
+                    $total = array_sum($tally);
+                    if ($total > 0) {
+                        $pct5 = round(($tally[5] / $total) * 100, 1);
+                        $pct4 = round(($tally[4] / $total) * 100, 1);
+                        $pct3 = round(($tally[3] / $total) * 100, 1);
+                        $pct12 = round((($tally[1] + $tally[2]) / $total) * 100, 1);
+                        
+                        if ($pct5 >= 50) {
+                            $desc = "Sangat membanggakan, mayoritas mutlak responden (<strong>{$pct5}%</strong>) memberikan penilaian <strong>Sangat Baik</strong>, didukung oleh penilaian Baik sebesar {$pct4}%. Hal ini menegaskan bahwa kualitas pada indikator ini telah melampaui ekspektasi mahasiswa.";
+                        } elseif ($pct4 + $pct5 >= 60) {
+                            $desc = "Sebagian besar responden memberikan respons positif, dengan akumulasi <strong>" . ($pct4+$pct5) . "%</strong> menilai Baik hingga Sangat Baik. Indikator ini berjalan dengan optimal dan patut dipertahankan.";
+                        } elseif ($pct3 >= 40) {
+                            $desc = "Penilaian cenderung berada pada tingkat rata-rata, dengan <strong>{$pct3}%</strong> responden merasa Cukup. Diperlukan peninjauan lebih lanjut untuk meningkatkan kualitas indikator ini agar mencapai standar yang lebih memuaskan.";
+                        } elseif ($pct12 >= 30) {
+                            $desc = "Terdapat porsi yang signifikan (<strong>{$pct12}%</strong>) dari responden yang memberikan penilaian Kurang hingga Sangat Kurang. Ini menjadi area evaluasi kritis yang membutuhkan intervensi dan perbaikan segera.";
+                        } else {
+                            $desc = "Distribusi penilaian cukup bervariasi dengan kecenderungan positif moderat (Sangat Baik: {$pct5}%, Baik: {$pct4}%, Cukup: {$pct3}%).";
+                        }
+                        
+                        $analisisInstrumenHtml .= "<li style='margin-bottom:10px; text-align: justify; line-height: 1.6;'>Terkait indikator <em>\"{$q->question_text}\"</em>: {$desc}</li>";
+                    }
+                }
+                $analisisInstrumenHtml .= "</ul>";
+            }
+            $analisisInstrumenHtml .= "</div>";
+            $bab4Content = str_replace('[ANALISIS_PER_INSTRUMEN]', $analisisInstrumenHtml, $bab4Content);
+        }
     @endphp
     <div class="page">
         <div class="chapter-title">BAB IV<br>ANALISIS DAN PEMBAHASAN</div>

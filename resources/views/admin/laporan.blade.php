@@ -311,7 +311,8 @@
                                     </h2>
                                     <div id="colBab4" class="accordion-collapse collapse">
                                         <div class="accordion-body bg-light">
-                                            <textarea name="bab4" class="form-control" rows="4" placeholder="Analisis hasil, kekuatan, kelemahan...">{{ $config['bab4'] ?? '' }}</textarea>
+                                            <p class="text-muted small mb-2"><i class="bi bi-info-circle me-1"></i> Anda dapat menggunakan kode <strong>[ANALISIS_PER_INSTRUMEN]</strong> untuk otomatis menyisipkan narasi pembahasan dari setiap grafik evaluasi yang ada.</p>
+                                            <textarea name="bab4" class="form-control" rows="4" placeholder="Analisis hasil, kekuatan, kelemahan... (Gunakan [ANALISIS_PER_INSTRUMEN] untuk auto-generate teks grafik)">{{ $config['bab4'] ?? '' }}</textarea>
                                         </div>
                                     </div>
                                 </div>

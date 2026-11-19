@@ -352,6 +352,106 @@ class AdminController extends Controller
         }
     }
 
+    /**
+     * Parse periode string into structured components (academic year, semester, report year, label).
+     */
+    private function parsePeriodeComponents(?string $periode): array
+    {
+        $raw = $periode ?: '';
+        
+        $tahunAkademik = '';
+        $coverYear = date('Y');
+        
+        if (preg_match('/(\d{4})\s*[\/\-]\s*(\d{4})/', $raw, $m)) {
+            $tahunAkademik = "{$m[1]}/{$m[2]}";
+            $coverYear = $m[2];
+        } else {
+            $tahunAkademik = date('Y') . '/' . (date('Y') + 1);
+        }
+
+        $semester = '';
+        if (stripos($raw, 'genap') !== false) {
+            $semester = 'Genap';
+        } elseif (stripos($raw, 'ganjil') !== false) {
+            $semester = 'Ganjil';
+        }
+
+        $periodeLabel = trim(preg_replace('/\s+/', ' ', str_ireplace('REGULER', '', $raw)));
+        if (empty($periodeLabel)) {
+            $periodeLabel = trim("{$tahunAkademik} {$semester}");
+        }
+
+        return [
+            'tahunAkademik'          => $tahunAkademik,
+            'semester'               => $semester,
+            'coverYear'              => $coverYear,
+            'periodeLabel'           => $periodeLabel,
+            'activePeriodeFormatted' => trim("{$tahunAkademik} {$semester}"),
+        ];
+    }
+
+    private function getConfigPath($prodiId, $periode = null): array
+    {
+        $prodiStr = $prodiId ? 'prodi_' . $prodiId : 'univ';
+        $basePath = storage_path("app/report_config_{$prodiStr}.json");
+        
+        $periodePath = null;
+        if (!empty($periode)) {
+            $slug = \Illuminate\Support\Str::slug($periode, '_');
+            $periodePath = storage_path("app/report_config_{$prodiStr}_{$slug}.json");
+        }
+
+        return [$basePath, $periodePath];
+    }
+
+    private function loadReportConfig($prodiId, $periode = null): array
+    {
+        [$basePath, $periodePath] = $this->getConfigPath($prodiId, $periode);
+
+        if ($periodePath && file_exists($periodePath)) {
+            $data = json_decode(file_get_contents($periodePath), true);
+            if (is_array($data)) return $data;
+        }
+
+        if (file_exists($basePath)) {
+            $data = json_decode(file_get_contents($basePath), true);
+            if (is_array($data)) return $data;
+        }
+
+        return [];
+    }
+
+    private function formatDynamicReportText(string $text, array $pComp, string $prodiName, int $totalResponden = 0, int $totalDosen = 0, string $rataRataPredikat = 'Sangat Baik'): string
+    {
+        if (empty($text)) {
+            return '';
+        }
+
+        $text = str_replace(
+            ['[NAMA_PRODI]', '[PERIODE]', '[TAHUN_AKADEMIK]', '[SEMESTER]', '[TAHUN]', '[TOTAL_RESPONDEN]', '[TOTAL_DOSEN]', '[RATA_RATA_PREDIKAT]'],
+            [$prodiName, $pComp['periodeLabel'], $pComp['tahunAkademik'], $pComp['semester'], $pComp['coverYear'], $totalResponden, $totalDosen, $rataRataPredikat],
+            $text
+        );
+
+        $text = preg_replace(
+            '/(Tahun\s+Akademik\s+)\d{4}\s*[\/\-]\s*\d{4}\s+(Genap|Ganjil)(\s+Reguler)?/i',
+            '${1}' . $pComp['tahunAkademik'] . ' ' . $pComp['semester'] . '${3}',
+            $text
+        );
+        $text = preg_replace(
+            '/(Semester\s+)(Genap|Ganjil)(\s+Tahun\s+Akademik\s+)\d{4}\s*[\/\-]\s*\d{4}/i',
+            '${1}' . $pComp['semester'] . '${3}' . $pComp['tahunAkademik'],
+            $text
+        );
+        $text = preg_replace(
+            '/(Palembang,\s*(?:&nbsp;|\s)*)\d{4}/i',
+            'Palembang, ' . $pComp['coverYear'],
+            $text
+        );
+
+        return $text;
+    }
+
     public function laporan(Request $request)
     {
         if (!$request->has('periode')) {
@@ -381,32 +481,67 @@ class AdminController extends Controller
         $filterPeriodes = \App\Models\Jadwal::select('periode')->whereNotNull('periode')->distinct()->pluck('periode')->filter();
         $prodis = \App\Models\Prodi::orderBy('name')->get();
 
-        $prodiStr = $request->prodi_id ? 'prodi_' . $request->prodi_id : 'univ';
-        $configPath = storage_path("app/report_config_{$prodiStr}.json");
-        $defaultProdiName = $request->prodi_id ? ($prodis->firstWhere('id', $request->prodi_id)->name ?? 'Ilmu Komputer') : 'Ilmu Komputer Fakultas Ilmu Komputer Universitas Sumatera Selatan';
-        $defaultPeriodeName = $request->periode ?? 'November 2020';
+        $pComp = $this->parsePeriodeComponents($request->periode);
+        $tahunAkademik = $pComp['tahunAkademik'];
+        $semester = $pComp['semester'];
+        $coverYear = $pComp['coverYear'];
+        $activePeriodeFormatted = $pComp['activePeriodeFormatted'];
+
+        $defaultProdiName = $request->prodi_id ? ($prodis->firstWhere('id', $request->prodi_id)->name ?? 'Ilmu Komputer') : 'Universitas Sumatera Selatan';
+        $activeProdiName = $defaultProdiName;
+
         $defaultTotalResponden = \App\Models\Evaluation::whereIn('jadwal_id', $jadwals->pluck('id'))->count();
         $defaultTotalDosen = $jadwals->unique('dosen_id')->count();
 
         $defaultBab3 = "<p>Survey Kepuasan Mahasiswa Terhadap Dosen dalam Pengajaran Program Studi [NAMA_PRODI] dilakukan pada bulan [PERIODE] dengan menyebarkan kuesioner secara online. Penyebaran kuesioner dilakukan melalui SIMAK dengan menggunakan google drive. Hasil survey diperoleh jumlah responden yang memberikan jawaban sebanyak [TOTAL_RESPONDEN] responden dalam hal ini mahasiswa Program Studi [NAMA_PRODI].</p><p><strong>Dosen Objek Survey</strong><br>Jumlah Dosen Prodi [NAMA_PRODI] yang disurvey sebanyak [TOTAL_DOSEN] orang. Kelompok Dosen digambarkan pada grafik berikut.</p><p>[PIE_CHART_DOSEN]</p><p><strong>Penilaian terhadap Kinerja Dosen dalam Proses Belajar Mengajar, Kapabilitas/ Kompetensi Dosen dan Ketersediaan Sarana Prasaran</strong><br>Hasil survey Kepuasan Mahasiswa terhadap Kapabilitas/ Kompetensi Dosen dan Ketersediaan Sarana Prasaran memperlihatkan bahwa secara umum Dosen Program Studi [NAMA_PRODI] melaksanakan proses pembelajaran [RATA_RATA_PREDIKAT].</p><p><strong>Tabulasi Penilaian Kepuasan Mahasiswa terhadap Dosen dalam Pembelajaran</strong></p>";
 
-        $config = file_exists($configPath) ? json_decode(file_get_contents($configPath), true) : [
-            'kata_pengantar' => '',
-            'daftar_isi' => '',
-            'bab1' => '',
-            'bab2' => '',
-            'bab3' => '',
-            'bab4' => '',
-            'bab5' => '',
-            'lampiran' => '',
-            'cover' => ''
-        ];
+        $defaultKataPengantar = "<p>Puji syukur ke hadirat Tuhan Yang Maha Esa atas segala rahmat dan karunia-Nya sehingga <strong>Laporan Hasil Evaluasi Dosen dalam Mengajar Tahun Akademik [TAHUN_AKADEMIK] [SEMESTER] Program Studi [NAMA_PRODI] Universitas Sumatera Selatan</strong> ini dapat disusun dengan baik. Evaluasi dosen dalam mengajar merupakan salah satu instrumen penting dalam pelaksanaan Sistem Penjaminan Mutu Internal (SPMI) untuk mengukur dan meningkatkan kualitas proses pembelajaran di lingkungan perguruan tinggi. Melalui evaluasi ini, mahasiswa diberikan kesempatan untuk memberikan umpan balik secara objektif terhadap pelaksanaan kegiatan pembelajaran yang dilakukan oleh dosen selama satu semester.</p><p>Laporan ini disusun berdasarkan hasil pengisian kuesioner oleh mahasiswa pada <strong>Tahun Akademik [TAHUN_AKADEMIK] [SEMESTER] Reguler</strong> di <strong>Program Studi [NAMA_PRODI] Universitas Sumatera Selatan</strong>. Hasil evaluasi diharapkan dapat menjadi bahan refleksi dan masukan bagi dosen, program studi, fakultas, serta universitas dalam melakukan perbaikan dan peningkatan mutu pembelajaran secara berkelanjutan.</p><p>Kami menyampaikan apresiasi dan ucapan terima kasih kepada seluruh mahasiswa yang telah berpartisipasi dalam pengisian kuesioner, para dosen yang senantiasa berkomitmen meningkatkan kualitas pengajaran, serta seluruh pihak yang telah mendukung terselenggaranya kegiatan evaluasi ini. Semangat kolaborasi dan budaya mutu yang terus dibangun diharapkan mampu mendukung terciptanya proses pembelajaran yang efektif, inovatif, dan berorientasi pada kebutuhan mahasiswa.</p><p>Semoga laporan ini dapat memberikan manfaat sebagai bahan evaluasi, pengambilan keputusan, dan perencanaan strategi peningkatan kualitas pendidikan di Program Studi [NAMA_PRODI] Universitas Sumatera Selatan.</p><p>&nbsp;</p><p><strong>Palembang, [TAHUN]</strong></p><p><strong>Lembaga Penjamin Mutu dan Akreditasi<br>Universitas Sumatera Selatan</strong></p>";
+
+        $config = $this->loadReportConfig($request->prodi_id, $request->periode);
+
+        if (empty($config)) {
+            $config = [
+                'kata_pengantar' => $defaultKataPengantar,
+                'daftar_isi' => '',
+                'bab1' => '',
+                'bab2' => '',
+                'bab3' => $defaultBab3,
+                'bab4' => '',
+                'bab5' => '',
+                'lampiran' => '',
+                'cover' => '',
+                'tipe_cover' => 'standard'
+            ];
+        }
 
         if (empty($config['bab3'])) {
             $config['bab3'] = $defaultBab3;
         }
 
-        return view('admin.laporan', compact('jadwals', 'filterPeriodes', 'prodis', 'config'));
+        if (empty($config['kata_pengantar'])) {
+            $config['kata_pengantar'] = $defaultKataPengantar;
+        }
+
+        // Terapkan penyesuaian dinamis pada kata pengantar untuk periode aktif
+        $config['kata_pengantar'] = $this->formatDynamicReportText(
+            $config['kata_pengantar'],
+            $pComp,
+            $activeProdiName,
+            $defaultTotalResponden,
+            $defaultTotalDosen
+        );
+
+        return view('admin.laporan', compact(
+            'jadwals',
+            'filterPeriodes',
+            'prodis',
+            'config',
+            'tahunAkademik',
+            'semester',
+            'coverYear',
+            'activePeriodeFormatted',
+            'activeProdiName'
+        ));
     }
 
     public function cetakTabel(Request $request)
@@ -457,9 +592,8 @@ class AdminController extends Controller
             'image' => 'File yang diupload harus berupa gambar (JPG/PNG).',
         ]);
 
-        $prodiStr = $request->prodi_id ? 'prodi_' . $request->prodi_id : 'univ';
-        $configPath = storage_path("app/report_config_{$prodiStr}.json");
-        $config = file_exists($configPath) ? json_decode(file_get_contents($configPath), true) : [];
+        [$basePath, $periodePath] = $this->getConfigPath($request->prodi_id, $request->periode);
+        $config = $this->loadReportConfig($request->prodi_id, $request->periode);
 
         try {
             // Pastikan folder uploads tersedia
@@ -496,7 +630,9 @@ class AdminController extends Controller
             return redirect()->back()->withErrors(['upload' => 'Error Upload: ' . $e->getMessage()])->withInput();
         }
 
+        $config['tipe_cover'] = $request->tipe_cover ?? ($config['tipe_cover'] ?? 'standard');
         $config['kata_pengantar'] = $request->kata_pengantar ?? '';
+        $config['lembar_pengesahan'] = $request->lembar_pengesahan ?? '';
         $config['bab1'] = $request->bab1 ?? '';
         $config['bab2'] = $request->bab2 ?? '';
         $config['bab3'] = $request->bab3 ?? '';
@@ -508,9 +644,14 @@ class AdminController extends Controller
             if (!is_array($config)) {
                 $config = [];
             }
-            $result = @file_put_contents($configPath, json_encode($config));
+            $savePath = $periodePath ?? $basePath;
+            $result = @file_put_contents($savePath, json_encode($config));
             if ($result === false) {
-                throw new \Exception("Gagal menulis ke file $configPath. Pastikan folder storage/app memiliki izin write (chmod 775/777).");
+                throw new \Exception("Gagal menulis ke file $savePath. Pastikan folder storage/app memiliki izin write (chmod 775/777).");
+            }
+
+            if (!file_exists($basePath)) {
+                @file_put_contents($basePath, json_encode($config));
             }
         } catch (\Throwable $e) {
             return redirect()->back()->withErrors(['sistem' => $e->getMessage()])->withInput();
@@ -557,10 +698,23 @@ class AdminController extends Controller
             else $jadwal->predikat = 'Sangat Kurang';
         }
 
-        $prodiStr = $request->prodi_id ? 'prodi_' . $request->prodi_id : 'univ';
-        $configPath = storage_path("app/report_config_{$prodiStr}.json");
-        $config = file_exists($configPath) ? json_decode(file_get_contents($configPath), true) : [];
+        $config = $this->loadReportConfig($request->prodi_id, $request->periode);
         $prodis = \App\Models\Prodi::orderBy('name')->get();
+
+        $pComp = $this->parsePeriodeComponents($request->periode);
+        $tahunAkademik = $pComp['tahunAkademik'];
+        $semester = $pComp['semester'];
+        $coverYear = $pComp['coverYear'];
+        $activePeriodeFormatted = $pComp['activePeriodeFormatted'];
+
+        $activeProdiName = $request->prodi_id 
+            ? ($prodis->firstWhere('id', $request->prodi_id)->name ?? 'Ilmu Komputer') 
+            : 'Universitas Sumatera Selatan';
+
+        $activeTotalResponden = \App\Models\Evaluation::whereIn('jadwal_id', $jadwals->pluck('id'))->count();
+        $activeTotalDosen = $jadwals->unique('dosen_id')->count();
+
+        $defaultKataPengantar = "<p>Puji syukur ke hadirat Tuhan Yang Maha Esa atas segala rahmat dan karunia-Nya sehingga <strong>Laporan Hasil Evaluasi Dosen dalam Mengajar Tahun Akademik [TAHUN_AKADEMIK] [SEMESTER] Program Studi [NAMA_PRODI] Universitas Sumatera Selatan</strong> ini dapat disusun dengan baik. Evaluasi dosen dalam mengajar merupakan salah satu instrumen penting dalam pelaksanaan Sistem Penjaminan Mutu Internal (SPMI) untuk mengukur dan meningkatkan kualitas proses pembelajaran di lingkungan perguruan tinggi. Melalui evaluasi ini, mahasiswa diberikan kesempatan untuk memberikan umpan balik secara objektif terhadap pelaksanaan kegiatan pembelajaran yang dilakukan oleh dosen selama satu semester.</p><p>Laporan ini disusun berdasarkan hasil pengisian kuesioner oleh mahasiswa pada <strong>Tahun Akademik [TAHUN_AKADEMIK] [SEMESTER] Reguler</strong> di <strong>Program Studi [NAMA_PRODI] Universitas Sumatera Selatan</strong>. Hasil evaluasi diharapkan dapat menjadi bahan refleksi dan masukan bagi dosen, program studi, fakultas, serta universitas dalam melakukan perbaikan dan peningkatan mutu pembelajaran secara berkelanjutan.</p><p>Kami menyampaikan apresiasi dan ucapan terima kasih kepada seluruh mahasiswa yang telah berpartisipasi dalam pengisian kuesioner, para dosen yang senantiasa berkomitmen meningkatkan kualitas pengajaran, serta seluruh pihak yang telah mendukung terselenggaranya kegiatan evaluasi ini. Semangat kolaborasi dan budaya mutu yang terus dibangun diharapkan mampu mendukung terciptanya proses pembelajaran yang efektif, inovatif, dan berorientasi pada kebutuhan mahasiswa.</p><p>Semoga laporan ini dapat memberikan manfaat sebagai bahan evaluasi, pengambilan keputusan, dan perencanaan strategi peningkatan kualitas pendidikan di Program Studi [NAMA_PRODI] Universitas Sumatera Selatan.</p><p>&nbsp;</p><p><strong>Palembang, [TAHUN]</strong></p><p><strong>Lembaga Penjamin Mutu dan Akreditasi<br>Universitas Sumatera Selatan</strong></p>";
 
         $defaultBab3 = "<p>Survey Kepuasan Mahasiswa Terhadap Dosen dalam Pengajaran Program Studi [NAMA_PRODI] dilakukan pada bulan [PERIODE] dengan menyebarkan kuesioner secara online. Penyebaran kuesioner dilakukan melalui SIMAK dengan menggunakan google drive. Hasil survey diperoleh jumlah responden yang memberikan jawaban sebanyak [TOTAL_RESPONDEN] responden dalam hal ini mahasiswa Program Studi [NAMA_PRODI].</p><p><strong>Dosen Objek Survey</strong><br>Jumlah Dosen Prodi [NAMA_PRODI] yang disurvey sebanyak [TOTAL_DOSEN] orang. Kelompok Dosen digambarkan pada grafik berikut.</p><p>[PIE_CHART_DOSEN]</p><p><strong>Penilaian terhadap Kinerja Dosen dalam Proses Belajar Mengajar, Kapabilitas/ Kompetensi Dosen dan Ketersediaan Sarana Prasaran</strong><br>Hasil survey Kepuasan Mahasiswa terhadap Kapabilitas/ Kompetensi Dosen dan Ketersediaan Sarana Prasaran memperlihatkan bahwa secara umum Dosen Program Studi [NAMA_PRODI] melaksanakan proses pembelajaran [RATA_RATA_PREDIKAT].</p><p><strong>Tabulasi Penilaian Kepuasan Mahasiswa terhadap Dosen dalam Pembelajaran</strong></p><p>Adapun penjabaran secara terperinci mengenai frekuensi jawaban responden untuk setiap instrumen pertanyaan dapat dilihat pada grafik batang di <strong>Lampiran 2: Grafik Hasil Survei Instrumen</strong>.</p>";
 
@@ -568,6 +722,9 @@ class AdminController extends Controller
 
         $defaultBab5 = "<p><strong>A. Kesimpulan</strong></p><p>Berdasarkan data dan analisis survei kepuasan mahasiswa terhadap kinerja pengajaran dosen di Program Studi [NAMA_PRODI] pada periode [PERIODE], dapat ditarik kesimpulan sebagai berikut:</p><ol><li>Secara garis besar, proses pembelajaran telah berjalan dengan <strong>[RATA_RATA_PREDIKAT]</strong>. Hal ini menunjukkan komitmen yang kuat dari tenaga pendidik dalam menyelenggarakan kegiatan akademik yang berkualitas.</li><li>Aspek <strong>Proses Belajar Mengajar (PBM)</strong> mendapatkan predikat [PREDIKAT_PBM], aspek <strong>Kapabilitas/Kompetensi Dosen (KKD)</strong> mendapatkan predikat [PREDIKAT_KKD], dan aspek <strong>Ketersediaan Sarana Prasarana (KSP)</strong> mendapatkan predikat [PREDIKAT_KSP].</li><li>Antusiasme dan partisipasi mahasiswa dalam memberikan umpan balik (sebanyak [TOTAL_RESPONDEN] respons untuk [TOTAL_DOSEN] dosen) mencerminkan kepedulian yang tinggi terhadap perbaikan mutu pendidikan di lingkungan kampus.</li></ol><p><strong>B. Rekomendasi</strong></p><p>Untuk mewujudkan lingkungan belajar yang lebih optimal di masa mendatang, diusulkan beberapa rekomendasi berikut:</p><ol><li><strong>Bagi Dosen:</strong> Diharapkan dapat mempertahankan metode pengajaran yang sudah dinilai baik oleh mahasiswa dan terus berinovasi dalam mengadopsi teknologi pembelajaran terkini guna meningkatkan interaktivitas.</li><li><strong>Bagi Program Studi:</strong> Disarankan untuk memfasilitasi pelatihan berkelanjutan terkait pedagogi dan penggunaan media ajar inovatif, terutama untuk indikator-indikator yang masih berpeluang untuk ditingkatkan.</li><li><strong>Bagi Institusi:</strong> Meninjau kembali dan memelihara sarana prasarana penunjang perkuliahan secara berkala agar mahasiswa dan dosen selalu merasa nyaman selama proses belajar mengajar berlangsung.</li></ol>";
 
+        if (empty($config['kata_pengantar'])) {
+            $config['kata_pengantar'] = $defaultKataPengantar;
+        }
         if (empty($config['bab3'])) {
             $config['bab3'] = $defaultBab3;
         }
@@ -595,7 +752,68 @@ class AdminController extends Controller
             }
         }
 
-        return view('admin.laporan_buku', compact('jadwals', 'config', 'prodis', 'questions', 'chartData'));
+        $overallPredikat = 'Sangat Baik';
+        if ($jadwals->isNotEmpty()) {
+            $avgScore = $jadwals->avg('average_score');
+            if ($avgScore >= 71.2) $overallPredikat = 'Sangat Baik';
+            elseif ($avgScore >= 58.1) $overallPredikat = 'Baik';
+            elseif ($avgScore >= 44.4) $overallPredikat = 'Sedang';
+            elseif ($avgScore >= 30.7) $overallPredikat = 'Buruk';
+            else $overallPredikat = 'Sangat Buruk';
+        }
+
+        $kataPengantarContent = $this->formatDynamicReportText(
+            $config['kata_pengantar'],
+            $pComp,
+            $activeProdiName,
+            $activeTotalResponden,
+            $activeTotalDosen,
+            $overallPredikat
+        );
+
+        $bab1Content = $this->formatDynamicReportText(
+            $config['bab1'] ?? '',
+            $pComp,
+            $activeProdiName,
+            $activeTotalResponden,
+            $activeTotalDosen,
+            $overallPredikat
+        );
+
+        $bab2Content = $this->formatDynamicReportText(
+            $config['bab2'] ?? '',
+            $pComp,
+            $activeProdiName,
+            $activeTotalResponden,
+            $activeTotalDosen,
+            $overallPredikat
+        );
+
+        $lembarPengesahanContent = $this->formatDynamicReportText(
+            $config['lembar_pengesahan'] ?? '',
+            $pComp,
+            $activeProdiName,
+            $activeTotalResponden,
+            $activeTotalDosen,
+            $overallPredikat
+        );
+
+        return view('admin.laporan_buku', compact(
+            'jadwals',
+            'config',
+            'prodis',
+            'questions',
+            'chartData',
+            'tahunAkademik',
+            'semester',
+            'coverYear',
+            'activePeriodeFormatted',
+            'activeProdiName',
+            'kataPengantarContent',
+            'bab1Content',
+            'bab2Content',
+            'lembarPengesahanContent'
+        ));
     }
 
     private function calculateJadwalScores($jadwals)

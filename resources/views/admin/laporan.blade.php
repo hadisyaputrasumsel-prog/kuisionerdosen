@@ -219,14 +219,54 @@
                             <input type="hidden" name="periode" value="{{ request('periode') }}">
                             <input type="hidden" name="prodi_id" value="{{ request('prodi_id') }}">
 
-                            <div class="mb-4">
-                                <label class="form-label fw-bold">Upload Cover Laporan (Opsional, JPG/PNG)</label>
-                                @if(isset($config['cover']) && $config['cover'])
-                                    <div class="mb-2">
-                                        <img src="{{ asset($config['cover']) }}" alt="Cover" class="img-thumbnail" style="max-height: 150px;">
+                            <div class="card mb-4 bg-light border rounded-3">
+                                <div class="card-body p-3">
+                                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                                        <div>
+                                            <h6 class="fw-bold mb-1 text-dark"><i class="bi bi-file-earmark-richtext me-2 text-primary"></i>Pengaturan Cover Laporan</h6>
+                                            <span class="badge bg-primary me-2">Periode Aktif: {{ $activePeriodeFormatted ?? request('periode') }}</span>
+                                            <span class="badge bg-secondary">Tahun Laporan: {{ $coverYear ?? date('Y') }}</span>
+                                        </div>
+                                        @if(isset($config['cover']) && $config['cover'])
+                                            <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Cover / Logo Terpasang</span>
+                                        @endif
                                     </div>
-                                @endif
-                                <input class="form-control" type="file" name="cover" accept="image/*">
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold small text-uppercase" style="letter-spacing: 0.5px;">Tipe Tampilan Cover Buku</label>
+                                        <div class="d-flex flex-wrap gap-4 p-3 bg-white rounded border">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="tipe_cover" id="tipeCoverStandard" value="standard" {{ ($config['tipe_cover'] ?? 'standard') === 'standard' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="tipeCoverStandard">
+                                                    <strong class="text-dark">Cover Resmi Standar (Dinamis Otomatis)</strong>
+                                                    <div class="text-muted small">Judul, Periode, Prodi, dan Tahun digenerate otomatis sesuai periode. Jika ada gambar, akan ditampilkan sebagai logo kampus di tengah.</div>
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="tipe_cover" id="tipeCoverFull" value="full" {{ ($config['tipe_cover'] ?? '') === 'full' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="tipeCoverFull">
+                                                    <strong class="text-dark">Cover Gambar Penuh (Full Page A4)</strong>
+                                                    <div class="text-muted small">Gambar yang diupload akan menutupi 1 halaman penuh A4 sebagai cover depan.</div>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="form-label fw-semibold small text-uppercase" style="letter-spacing: 0.5px;">File Gambar Cover / Logo (Opsional, JPG/PNG)</label>
+                                        @if(isset($config['cover']) && $config['cover'])
+                                            <div class="mb-2 d-flex align-items-center gap-3 bg-white p-2 border rounded">
+                                                <img src="{{ asset($config['cover']) }}" alt="Cover" class="img-thumbnail" style="max-height: 80px;">
+                                                <div>
+                                                    <small class="text-muted d-block">File aktif untuk periode ini:</small>
+                                                    <code class="small">{{ $config['cover'] }}</code>
+                                                </div>
+                                            </div>
+                                        @endif
+                                        <input class="form-control" type="file" name="cover" accept="image/*">
+                                        <small class="text-muted mt-1 d-block"><i class="bi bi-info-circle me-1"></i>Cover disimpan khusus untuk periode ini. Mengganti cover tidak akan merusak cover periode lainnya.</small>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="accordion mb-4" id="editorAccordion">
@@ -240,7 +280,10 @@
                                     </h2>
                                     <div id="colKataPengantar" class="accordion-collapse collapse">
                                         <div class="accordion-body bg-light">
-                                            <textarea name="kata_pengantar" class="form-control" rows="4" placeholder="Tuliskan kata pengantar di sini...">{{ $config['kata_pengantar'] ?? '' }}</textarea>
+                                            <div class="alert alert-info py-2 px-3 small mb-2 border-0">
+                                                <i class="bi bi-info-circle me-1"></i> Teks di bawah telah <strong>disinkronkan dinamis</strong> dengan periode aktif (<strong>{{ $activePeriodeFormatted ?? request('periode') }}</strong>). Anda juga bisa menggunakan kode <code>[PERIODE]</code>, <code>[TAHUN_AKADEMIK]</code>, <code>[SEMESTER]</code>, <code>[NAMA_PRODI]</code>, <code>[TAHUN]</code>.
+                                            </div>
+                                            <textarea name="kata_pengantar" class="form-control" rows="6" placeholder="Tuliskan kata pengantar di sini...">{{ $config['kata_pengantar'] ?? '' }}</textarea>
                                         </div>
                                     </div>
                                 </div>

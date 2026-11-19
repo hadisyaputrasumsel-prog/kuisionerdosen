@@ -182,7 +182,11 @@
 
 <div class="book-container">
 
-    @if(!empty($config['cover']))
+    @php
+        $tipeCover = $config['tipe_cover'] ?? (!empty($config['cover']) ? 'full' : 'standard');
+    @endphp
+
+    @if($tipeCover === 'full' && !empty($config['cover']))
     <div class="page cover-full-page" id="cover-page-wrapper">
         <img src="{{ asset($config['cover']) }}" alt="Cover Full" id="cover-page-img">
     </div>
@@ -192,13 +196,13 @@
             <div class="cover-title">LAPORAN HASIL SURVEY KEPUASAN MAHASISWA</div>
             <div class="cover-subtitle">TERHADAP DOSEN DALAM PENGAJARAN</div>
             
-            <div style="font-size: 14pt; margin-top: 10px;">
-                @if(request('periode'))
-                    <div class="mb-2">Periode: {{ trim(str_ireplace('REGULER', '', request('periode'))) }}</div>
-                @endif
+            <div style="font-size: 15pt; margin-top: 15px;">
+                <div class="fw-bold mb-1" style="letter-spacing: 0.5px;">
+                    SEMESTER {{ strtoupper($semester ?? '') }} TAHUN AKADEMIK {{ $tahunAkademik ?? '' }}
+                </div>
                 
                 @if(request('prodi_id'))
-                    <div class="fw-bold">TINGKAT PROGRAM STUDI: {{ ucwords(strtolower($prodis->firstWhere('id', request('prodi_id'))->name ?? '')) }}</div>
+                    <div class="fw-bold text-uppercase">PROGRAM STUDI {{ strtoupper($prodis->firstWhere('id', request('prodi_id'))->name ?? '') }}</div>
                 @else
                     <div class="fw-bold">TINGKAT UNIVERSITAS</div>
                 @endif
@@ -206,34 +210,34 @@
         </div>
 
         @if(!empty($config['cover']))
-            <img src="{{ asset($config['cover']) }}" alt="Logo" class="cover-logo" style="max-width: 300px; max-height: 300px; object-fit: contain;">
+            <img src="{{ asset($config['cover']) }}" alt="Logo / Sampul" class="cover-logo" style="max-width: 250px; max-height: 250px; object-fit: contain;">
         @else
             <!-- Placeholder if no cover uploaded -->
-            <div style="height: 200px; display: flex; align-items: center; justify-content: center; border: 1px dashed #ccc; width: 100%; max-width: 200px; margin: 2rem auto;">
-                [Logo Kampus]
+            <div style="height: 180px; display: flex; align-items: center; justify-content: center; border: 1px dashed #ccc; width: 100%; max-width: 180px; margin: 2rem auto; border-radius: 8px;">
+                <span class="text-muted fw-bold">[Logo Kampus]</span>
             </div>
         @endif
 
         <div style="font-size: 16pt; font-weight: bold;">
             UNIVERSITAS SUMATERA SELATAN<br>
-            TAHUN {{ date('Y') }}
+            TAHUN {{ $coverYear ?? date('Y') }}
         </div>
     </div>
     @endif
 
     <!-- LEMBAR PENGESAHAN -->
-    @if(!empty($config['lembar_pengesahan']))
+    @if(!empty($lembarPengesahanContent ?? $config['lembar_pengesahan'] ?? null))
     <div class="page">
         <div class="chapter-title">LEMBAR PENGESAHAN</div>
-        <div class="content-text">{!! $config['lembar_pengesahan'] !!}</div>
+        <div class="content-text">{!! $lembarPengesahanContent ?? $config['lembar_pengesahan'] !!}</div>
     </div>
     @endif
 
     <!-- KATA PENGANTAR -->
-    @if(!empty($config['kata_pengantar']))
+    @if(!empty($kataPengantarContent ?? $config['kata_pengantar'] ?? null))
     <div class="page">
         <div class="chapter-title">KATA PENGANTAR</div>
-        <div class="content-text">{!! $config['kata_pengantar'] !!}</div>
+        <div class="content-text">{!! $kataPengantarContent ?? $config['kata_pengantar'] !!}</div>
     </div>
     @endif
 
@@ -246,18 +250,18 @@
     </div>
 
     <!-- BAB I -->
-    @if(!empty($config['bab1']))
+    @if(!empty($bab1Content ?? $config['bab1'] ?? null))
     <div class="page">
         <div class="chapter-title">BAB I<br>PENDAHULUAN</div>
-        <div class="content-text">{!! $config['bab1'] !!}</div>
+        <div class="content-text">{!! $bab1Content ?? $config['bab1'] !!}</div>
     </div>
     @endif
 
     <!-- BAB II -->
-    @if(!empty($config['bab2']))
+    @if(!empty($bab2Content ?? $config['bab2'] ?? null))
     <div class="page">
         <div class="chapter-title">BAB II<br>METODE EVALUASI</div>
-        <div class="content-text">{!! $config['bab2'] !!}</div>
+        <div class="content-text">{!! $bab2Content ?? $config['bab2'] !!}</div>
     </div>
     @endif
 

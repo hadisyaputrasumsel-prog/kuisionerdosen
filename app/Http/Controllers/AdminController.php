@@ -22,7 +22,7 @@ class AdminController extends Controller
             }
         }
 
-        $periodes = Jadwal::select('periode')->distinct()->pluck('periode')->filter();
+        $periodes = $this->getSortedPeriodes();
         
         $query = Jadwal::query();
         if ($request->filled('periode')) {
@@ -89,9 +89,11 @@ class AdminController extends Controller
         }
 
         $jadwals = $query->paginate(20);
-        $filterPeriodes = \App\Models\Jadwal::select('periode')->whereNotNull('periode')->distinct()->pluck('periode')->filter();
+        $filterPeriodes = $this->getSortedPeriodes();
         $prodis = \App\Models\Prodi::orderBy('name')->get();
-        $periodes = \App\Models\Periode::all();
+        $periodes = \App\Models\Periode::all()->sort(function($a, $b) {
+            return $this->getPeriodeSortKey($b->name) <=> $this->getPeriodeSortKey($a->name);
+        })->values();
 
         return view('admin.jadwal', compact('jadwals', 'filterPeriodes', 'prodis', 'periodes'));
     }
@@ -353,6 +355,45 @@ class AdminController extends Controller
     }
 
     /**
+     * Compute integer sort key for a period string (e.g. "2024 / 2025 GENAP REGULER" -> 20242).
+     */
+    private function getPeriodeSortKey(?string $periode): int
+    {
+        if (empty($periode)) {
+            return 0;
+        }
+
+        $year = 0;
+        if (preg_match('/(\d{4})\s*[\/\-]\s*(\d{4})/', $periode, $m)) {
+            $year = (int) $m[1];
+        } elseif (preg_match('/(\d{4})/', $periode, $m)) {
+            $year = (int) $m[1];
+        }
+
+        // Genap (semester 2) is later than Ganjil (semester 1) in the same academic year
+        $semesterWeight = (stripos($periode, 'genap') !== false) ? 2 : ((stripos($periode, 'ganjil') !== false) ? 1 : 0);
+
+        return ($year * 10) + $semesterWeight;
+    }
+
+    /**
+     * Get sorted list of periods in reverse chronological order (newest to oldest).
+     */
+    private function getSortedPeriodes()
+    {
+        return Jadwal::select('periode')
+            ->whereNotNull('periode')
+            ->where('periode', '!=', '')
+            ->distinct()
+            ->pluck('periode')
+            ->filter()
+            ->sort(function ($a, $b) {
+                return $this->getPeriodeSortKey($b) <=> $this->getPeriodeSortKey($a);
+            })
+            ->values();
+    }
+
+    /**
      * Parse periode string into structured components (academic year, semester, report year, label).
      */
     private function parsePeriodeComponents(?string $periode): array
@@ -478,7 +519,7 @@ class AdminController extends Controller
 
         $this->calculateJadwalScores($jadwals);
 
-        $filterPeriodes = \App\Models\Jadwal::select('periode')->whereNotNull('periode')->distinct()->pluck('periode')->filter();
+        $filterPeriodes = $this->getSortedPeriodes();
         $prodis = \App\Models\Prodi::orderBy('name')->get();
 
         $pComp = $this->parsePeriodeComponents($request->periode);

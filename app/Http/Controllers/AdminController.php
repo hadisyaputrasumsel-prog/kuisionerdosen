@@ -304,9 +304,9 @@ class AdminController extends Controller
             foreach ($popovers as $node) {
                 $content = $node->getAttribute('data-content');
                 
-                // Extract PRODI
+                // Extract PRODI (standarkan ke UPPERCASE agar tidak ada duplikasi casing)
                 preg_match('/PRODI : <span[^>]*>([^<]+)<\/span>/i', $content, $mProdi);
-                $program_studi = trim($mProdi[1] ?? '');
+                $program_studi = strtoupper(trim($mProdi[1] ?? ''));
                 
                 // Extract MATAKULIAH (buang text " - X SKS" di belakangnya)
                 preg_match('/MATAKULIAH : <span[^>]*>([^<]+?)(\s*-\s*\d+\s*SKS)?<\/span>/i', $content, $mMk);

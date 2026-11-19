@@ -63,22 +63,17 @@ class DatabaseSeeder extends Seeder
         $csvFile = base_path('semua_jadwal_ruangan.csv');
         
         if (!file_exists($csvFile)) {
-            // Fallback ke dummy data jika CSV tidak ada
-            $prodi1 = Prodi::create(['name' => 'Ilmu Komunikasi']);
-            $prodi2 = Prodi::create(['name' => 'Manajemen']);
-            $prodi3 = Prodi::create(['name' => 'Ilmu Komputer']);
-
-            $dosen1 = Dosen::create(['name' => 'Dr. Hadi Syaputra, S.Kom., M.Kom.']);
-            $dosen2 = Dosen::create(['name' => 'Intan Putri, S.I.Kom,. M.I.Kom']);
-            $dosen3 = Dosen::create(['name' => 'Rikkie Dekas, S.E., M.M.']);
-
-            $mk1 = MataKuliah::create(['name' => 'PENGOLAHAN CITRA', 'code' => 'IKM244321']);
-            $mk2 = MataKuliah::create(['name' => 'KOMUNIKASI MASSA', 'code' => 'KOM101']);
-            $mk3 = MataKuliah::create(['name' => 'PENGANGGARAN PERUSAHAAN', 'code' => 'MAN201']);
-
-            Jadwal::create(['prodi_id' => $prodi3->id, 'dosen_id' => $dosen1->id, 'mata_kuliah_id' => $mk1->id]);
-            Jadwal::create(['prodi_id' => $prodi1->id, 'dosen_id' => $dosen2->id, 'mata_kuliah_id' => $mk2->id]);
-            Jadwal::create(['prodi_id' => $prodi2->id, 'dosen_id' => $dosen3->id, 'mata_kuliah_id' => $mk3->id]);
+            // Master prodi resmi Universitas Sumatera Selatan (idempotent, tidak membuat duplikat)
+            $defaultProdis = [
+                'ILMU KOMUNIKASI',
+                'AGRIBISNIS',
+                'MANAJEMEN',
+                'ILMU KOMPUTER',
+                'ILMU PERIKANAN',
+            ];
+            foreach ($defaultProdis as $pName) {
+                Prodi::firstOrCreate(['name' => $pName]);
+            }
             return;
         }
 

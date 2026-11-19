@@ -138,45 +138,68 @@ class AdminController extends Controller
         return redirect()->back()->with('success', 'Periode berhasil ditambahkan.');
     }
 
+    /**
+     * Otentikasi ke SIMAK dan ambil URL Jadwal Mengajar serta CookieJar sesi.
+     *
+     * @param string $username
+     * @param string $password
+     * @param string|null $rawBaseUrl
+     * @return array{targetUrl: string, baseUrl: string, cookieJar: \GuzzleHttp\Cookie\CookieJar}
+     * @throws \Exception
+     */
+    private function getSimakJadwalUrl(string $username, string $password, ?string $rawBaseUrl = null): array
+    {
+        $cookieJar = new \GuzzleHttp\Cookie\CookieJar();
+        
+        $baseUrl = $rawBaseUrl ?? env('SIMAK_BASE_URL', 'https://simak.uss.ac.id');
+        $baseUrl = rtrim($baseUrl, '/');
+        
+        // 1. Login
+        \Illuminate\Support\Facades\Http::withOptions(['verify' => false, 'cookies' => $cookieJar])
+            ->withHeaders(['Host' => 'simak.uss.ac.id'])
+            ->asForm()
+            ->post($baseUrl . '/login/proses/', [
+                'username' => $username,
+                'password' => $password
+            ]);
+
+        // 2. Akses Dashboard
+        $dashRes = \Illuminate\Support\Facades\Http::withOptions(['verify' => false, 'cookies' => $cookieJar])
+            ->withHeaders(['Host' => 'simak.uss.ac.id'])
+            ->get($baseUrl . '/apps/dashboard/dashboard/');
+            
+        $html = $dashRes->body();
+        
+        // Cari link jadwal
+        if (preg_match('/href="([^"]+\/apps\/dosen\/jadwal\/[^"]+)"/', $html, $matches)) {
+            $targetUrl = $matches[1];
+            if (!str_starts_with($targetUrl, 'http')) {
+                $targetUrl = $baseUrl . $targetUrl;
+            }
+
+            return [
+                'targetUrl' => $targetUrl,
+                'baseUrl'   => $baseUrl,
+                'cookieJar' => $cookieJar
+            ];
+        }
+
+        throw new \Exception('Tidak dapat menemukan menu Jadwal Mengajar di dashboard SIMAK. Pastikan username dan password benar.');
+    }
+
     public function getPeriods(Request $request)
     {
         try {
-            $cookieJar = new \GuzzleHttp\Cookie\CookieJar();
-            
-            $baseUrl = $request->simak_url ?? env('SIMAK_BASE_URL', 'https://simak.uss.ac.id');
-            $baseUrl = rtrim($baseUrl, '/');
-            
-            // 1. Login
-            $loginRes = \Illuminate\Support\Facades\Http::withOptions(['verify' => false, 'cookies' => $cookieJar])
-                ->withHeaders(['Host' => 'simak.uss.ac.id'])
-                ->asForm()
-                ->post($baseUrl . '/login/proses/', [
-                    'username' => $request->simak_username,
-                    'password' => $request->simak_password
-                ]);
+            $session = $this->getSimakJadwalUrl(
+                $request->simak_username,
+                $request->simak_password,
+                $request->simak_url
+            );
 
-            // 2. Akses Dashboard
-            $dashRes = \Illuminate\Support\Facades\Http::withOptions(['verify' => false, 'cookies' => $cookieJar])
+            // Akses Jadwal
+            $jadwalRes = \Illuminate\Support\Facades\Http::withOptions(['verify' => false, 'cookies' => $session['cookieJar']])
                 ->withHeaders(['Host' => 'simak.uss.ac.id'])
-                ->get($baseUrl . '/apps/dashboard/dashboard/');
-                
-            $html = $dashRes->body();
-            
-            // Cari link jadwal
-            $targetUrl = null;
-            if (preg_match('/href="([^"]+\/apps\/dosen\/jadwal\/[^"]+)"/', $html, $matches)) {
-                $targetUrl = $matches[1];
-                if (!str_starts_with($targetUrl, 'http')) {
-                    $targetUrl = $baseUrl . $targetUrl;
-                }
-            } else {
-                return response()->json(['success' => false, 'message' => 'Tidak dapat menemukan menu Jadwal. Pastikan login benar.']);
-            }
-
-            // 3. Akses Jadwal
-            $jadwalRes = \Illuminate\Support\Facades\Http::withOptions(['verify' => false, 'cookies' => $cookieJar])
-                ->withHeaders(['Host' => 'simak.uss.ac.id'])
-                ->get($targetUrl);
+                ->get($session['targetUrl']);
                 
             $jadwalHtml = $jadwalRes->body();
             
@@ -208,59 +231,37 @@ class AdminController extends Controller
         ]);
 
         try {
-            $cookieJar = new \GuzzleHttp\Cookie\CookieJar();
-            
-            $baseUrl = $request->simak_url ?? env('SIMAK_BASE_URL', 'https://simak.uss.ac.id');
-            $baseUrl = rtrim($baseUrl, '/');
-            
-            // 1. Login
-            $loginRes = \Illuminate\Support\Facades\Http::withOptions(['verify' => false, 'cookies' => $cookieJar])
-                ->withHeaders(['Host' => 'simak.uss.ac.id'])
-                ->asForm()
-                ->post($baseUrl . '/login/proses/', [
-                    'username' => $request->simak_username,
-                    'password' => $request->simak_password
-                ]);
+            $session = $this->getSimakJadwalUrl(
+                $request->simak_username,
+                $request->simak_password,
+                $request->simak_url
+            );
 
-            // 2. Akses Dashboard
-            $dashRes = \Illuminate\Support\Facades\Http::withOptions(['verify' => false, 'cookies' => $cookieJar])
-                ->withHeaders(['Host' => 'simak.uss.ac.id'])
-                ->get($baseUrl . '/apps/dashboard/dashboard/');
-                
-            $html = $dashRes->body();
-            
-            // Cari link jadwal
-            $targetUrl = null;
-            if (preg_match('/href="([^"]+\/apps\/dosen\/jadwal\/[^"]+)"/', $html, $matches)) {
-                $targetUrl = $matches[1];
-                if (!str_starts_with($targetUrl, 'http')) {
-                    $targetUrl = $baseUrl . $targetUrl;
+            $targetUrl = $session['targetUrl'];
+            $baseUrl   = $session['baseUrl'];
+            $cookieJar = $session['cookieJar'];
+
+            // Jika user memilih periode spesifik
+            if ($request->filled('simak_ta')) {
+                $ta_val = $request->simak_ta;
+                // pastikan formatnya ada prefix "ta-"
+                if (is_numeric($ta_val) || !str_starts_with($ta_val, 'ta-')) {
+                    $ta_val = 'ta-' . str_replace('ta-', '', $ta_val);
                 }
                 
-                // Jika user memilih periode spesifik
-                if ($request->filled('simak_ta')) {
-                    $ta_val = $request->simak_ta;
-                    // pastikan formatnya ada prefix "ta-"
-                    if (is_numeric($ta_val) || !str_starts_with($ta_val, 'ta-')) {
-                        $ta_val = 'ta-' . str_replace('ta-', '', $ta_val);
-                    }
-                    
-                    $periode_string = $ta_val;
-                    if ($request->filled('simak_tipe')) {
-                        $periode_string .= '~' . $request->simak_tipe;
-                    }
-                    
-                    $parts = explode('/', rtrim($targetUrl, '/'));
-                    if (count($parts) >= 2) {
-                        $parts[count($parts) - 2] = $periode_string;
-                        $targetUrl = implode('/', $parts) . '/';
-                    }
+                $periode_string = $ta_val;
+                if ($request->filled('simak_tipe')) {
+                    $periode_string .= '~' . $request->simak_tipe;
                 }
-            } else {
-                return redirect()->back()->with('error', 'Gagal melakukan scraping: Tidak dapat menemukan menu Jadwal Mengajar di dashboard SIMAK. Pastikan username dan password benar.');
+                
+                $parts = explode('/', rtrim($targetUrl, '/'));
+                if (count($parts) >= 2) {
+                    $parts[count($parts) - 2] = $periode_string;
+                    $targetUrl = implode('/', $parts) . '/';
+                }
             }
 
-            // 3. Bangun URL Jadwal Global Kampus (Jadwal Ruangan)
+            // Bangun URL Jadwal Global Kampus (Jadwal Ruangan)
             $parts = explode('/', rtrim($targetUrl, '/'));
             $periode_str = $parts[count($parts) - 2] ?? '';
             
@@ -272,16 +273,22 @@ class AdminController extends Controller
                 $tipe = $matches[2];
             }
 
-            // Gunakan unit ID 5670 untuk USS Global Ruang Daftar
-            $globalUrl = "{$baseUrl}/apps/krs/gedung/ruang/daftar/5670/0~{$ta_id}~{$tipe}/";
+            // ID dosen diambil dari URL Jadwal Mengajar akun yang login (mis. /apps/dosen/jadwal/6172/...)
+            // SIMAK hanya mengizinkan Jadwal Ruangan dengan ID milik akun yang sedang login
+            $dosenUnitId = preg_match('#/apps/dosen/jadwal/(\d+)/#', $targetUrl, $mUnit) ? $mUnit[1] : '5670';
+            $globalUrl = "{$baseUrl}/apps/krs/gedung/ruang/daftar/{$dosenUnitId}/0~{$ta_id}~{$tipe}/";
             
-            // 4. Akses Jadwal Global
+            // Akses Jadwal Global
             $jadwalRes = \Illuminate\Support\Facades\Http::withOptions(['verify' => false, 'cookies' => $cookieJar])
                 ->withHeaders(['Host' => 'simak.uss.ac.id'])
                 ->get($globalUrl);
                 
             $jadwalHtml = $jadwalRes->body();
-            
+
+            if (stripos($jadwalHtml, 'LOGIN SISTEM AKADEMIK') !== false) {
+                return redirect()->back()->with('error', 'Gagal: SIMAK menolak akses ke halaman Jadwal Ruangan (diarahkan ke halaman login). Coba login ulang atau gunakan akun lain.');
+            }
+
             $dom = new \DOMDocument();
             @$dom->loadHTML($jadwalHtml);
             $xpath = new \DOMXPath($dom);
@@ -332,6 +339,10 @@ class AdminController extends Controller
                         $count++;
                     }
                 }
+            }
+
+            if ($count === 0) {
+                return redirect()->back()->with('warning', "Peringatan: Tidak ada data mata kuliah yang disinkronisasi (0 data ditemukan) dari URL: {$globalUrl}. Pastikan periode yang dipilih sudah memiliki jadwal di SIMAK.");
             }
 
             return redirect()->back()->with('success', "Data global kampus berhasil ditarik. Total mata kuliah baru disinkronisasi: $count");

@@ -62,28 +62,105 @@
         }
         
         /* Cover specific styling */
-        .cover-page {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            text-align: center;
-            padding-top: 4cm;
-            padding-bottom: 4cm;
+        .page.cover-page {
+            box-sizing: border-box;
+            background: white;
+            width: 21cm;
+            height: 29.7cm;
+            min-height: 29.7cm;
+            max-height: 29.7cm;
+            padding: 2.5cm;
+            margin: 2cm auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            position: relative;
+            page-break-inside: avoid;
+            page-break-after: always;
+            overflow: hidden;
         }
-        .cover-logo {
-            max-width: 200px;
-            margin: 2rem 0;
+        table.cover-layout-table,
+        table.cover-layout-table tr,
+        table.cover-layout-table td {
+            border: none !important;
+            border-width: 0 !important;
+            box-shadow: none !important;
+            background: transparent !important;
+        }
+        .cover-layout-table {
+            width: 100% !important;
+            height: 24.5cm !important;
+            min-height: 24.5cm !important;
+            max-height: 24.5cm !important;
+            border-collapse: collapse !important;
+            margin: 0 auto !important;
+            padding: 0 !important;
+            table-layout: fixed !important;
+        }
+        .cover-header-cell {
+            vertical-align: top !important;
+            text-align: center !important;
+            padding: 0 !important;
+            height: 32% !important;
         }
         .cover-title {
-            font-size: 20pt;
+            font-size: 18pt;
             font-weight: bold;
-            margin-bottom: 10px;
+            line-height: 1.35;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
         .cover-subtitle {
+            font-size: 14pt;
+            font-weight: bold;
+            line-height: 1.35;
+            margin-bottom: 25px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .cover-meta {
+            font-size: 13pt;
+            font-weight: bold;
+            line-height: 1.45;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .cover-meta-item {
+            margin-bottom: 4px;
+        }
+        .cover-logo-cell {
+            vertical-align: middle !important;
+            text-align: center !important;
+            padding: 20px 0 !important;
+            height: 48% !important;
+        }
+        .cover-logo {
+            width: auto;
+            max-width: 220px;
+            max-height: 220px;
+            object-fit: contain;
+            display: inline-block;
+            margin: 0 auto;
+        }
+        .cover-logo-placeholder {
+            height: 160px;
+            width: 160px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            margin: 0 auto;
+        }
+        .cover-footer-cell {
+            vertical-align: bottom !important;
+            text-align: center !important;
+            padding: 0 !important;
+            height: 20% !important;
             font-size: 16pt;
             font-weight: bold;
-            margin-bottom: 30px;
+            line-height: 1.4;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
 
         /* Ensure uploaded cover fills the A4 box on screen */
@@ -138,20 +215,43 @@
                 box-sizing: border-box;
             }
 
-            /* Add explicit padding back to the default cover page so text doesn't stick to the edge */
+            /* Default cover page in print */
             .page.cover-page {
-                padding: 4cm 2cm !important;
+                box-sizing: border-box !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                height: 24.5cm !important;
+                min-height: 24.5cm !important;
+                max-height: 24.5cm !important;
+                page-break-inside: avoid !important;
+                page-break-after: always !important;
+                overflow: hidden !important;
+                display: block !important;
+                background: white !important;
+            }
+            .page.cover-page .cover-layout-table {
+                width: 100% !important;
+                height: 24.5cm !important;
+                min-height: 24.5cm !important;
+                max-height: 24.5cm !important;
             }
 
             /* Fix cover image overflow in print */
             #cover-page-wrapper {
+                box-sizing: border-box !important;
                 padding: 0 !important;
                 margin: 0 !important;
-                height: 100vh !important;
-                width: 100% !important;
+                width: 21cm !important;
+                height: 29.65cm !important;
+                min-height: 29.65cm !important;
+                max-height: 29.65cm !important;
+                page-break-after: always !important;
+                page-break-inside: avoid !important;
+                overflow: hidden !important;
             }
             #cover-page-img {
-                height: 100vh !important;
+                height: 100% !important;
                 width: 100% !important;
                 object-fit: cover !important;
             }
@@ -192,36 +292,50 @@
     </div>
     @else
     <div class="page cover-page">
-        <div>
-            <div class="cover-title">LAPORAN HASIL SURVEY KEPUASAN MAHASISWA</div>
-            <div class="cover-subtitle">TERHADAP DOSEN DALAM PENGAJARAN</div>
-            
-            <div style="font-size: 15pt; margin-top: 15px;">
-                <div class="fw-bold mb-1" style="letter-spacing: 0.5px;">
-                    SEMESTER {{ strtoupper($semester ?? '') }} TAHUN AKADEMIK {{ $tahunAkademik ?? '' }}
-                </div>
-                
-                @if(request('prodi_id'))
-                    <div class="fw-bold text-uppercase">PROGRAM STUDI {{ strtoupper($prodis->firstWhere('id', request('prodi_id'))->name ?? '') }}</div>
-                @else
-                    <div class="fw-bold">TINGKAT UNIVERSITAS</div>
-                @endif
-            </div>
-        </div>
-
-        @if(!empty($config['cover']))
-            <img src="{{ asset($config['cover']) }}" alt="Logo / Sampul" class="cover-logo" style="max-width: 250px; max-height: 250px; object-fit: contain;">
-        @else
-            <!-- Placeholder if no cover uploaded -->
-            <div style="height: 180px; display: flex; align-items: center; justify-content: center; border: 1px dashed #ccc; width: 100%; max-width: 180px; margin: 2rem auto; border-radius: 8px;">
-                <span class="text-muted fw-bold">[Logo Kampus]</span>
-            </div>
-        @endif
-
-        <div style="font-size: 16pt; font-weight: bold;">
-            UNIVERSITAS SUMATERA SELATAN<br>
-            TAHUN {{ $coverYear ?? date('Y') }}
-        </div>
+        <table class="cover-layout-table">
+            <tbody>
+                <tr>
+                    <td class="cover-header-cell">
+                        <div class="cover-title">LAPORAN HASIL SURVEY KEPUASAN MAHASISWA</div>
+                        <div class="cover-subtitle">TERHADAP DOSEN DALAM PENGAJARAN</div>
+                        
+                        <div class="cover-meta">
+                            <div class="cover-meta-item">
+                                SEMESTER {{ strtoupper($semester ?? '') }} TAHUN AKADEMIK {{ $tahunAkademik ?? '' }}
+                            </div>
+                            
+                            @if(request('prodi_id'))
+                                <div class="cover-meta-item">
+                                    PROGRAM STUDI {{ strtoupper($prodis->firstWhere('id', request('prodi_id'))->name ?? '') }}
+                                </div>
+                            @else
+                                <div class="cover-meta-item">
+                                    TINGKAT UNIVERSITAS
+                                </div>
+                            @endif
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="cover-logo-cell">
+                        @if(!empty($config['cover']))
+                            <img src="{{ asset($config['cover']) }}" alt="Logo / Sampul" class="cover-logo">
+                        @else
+                            <!-- Placeholder if no cover uploaded -->
+                            <div class="cover-logo-placeholder">
+                                <span class="text-muted fw-bold">[Logo Kampus]</span>
+                            </div>
+                        @endif
+                    </td>
+                </tr>
+                <tr>
+                    <td class="cover-footer-cell">
+                        UNIVERSITAS SUMATERA SELATAN<br>
+                        TAHUN {{ $coverYear ?? date('Y') }}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
     @endif
 

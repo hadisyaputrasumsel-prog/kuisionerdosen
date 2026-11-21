@@ -187,36 +187,56 @@
         }
 
         @media print {
-            body {
-                background: white;
-                display: block;
+            @page {
+                size: A4 portrait;
                 margin: 0;
-                padding: 0;
             }
-            .controls { display: none; }
-            .book-container { max-width: none; width: 100%; margin: 0; padding: 0; }
-            
-            /* Remove padding from .page because @page margin will handle it */
-            .page {
+            html, body {
+                background: white !important;
+                display: block !important;
                 margin: 0 !important;
-                padding: 0 0 1cm 0 !important; 
-                box-shadow: none;
-                page-break-after: always;
-                min-height: 24.7cm !important; /* A4 height (29.7) minus top/bottom margins (2.5 * 2) */
-                height: auto !important;
-                position: relative;
-                box-sizing: border-box;
+                padding: 0 !important;
+                width: 21cm !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .controls {
+                display: none !important;
+            }
+            .book-container {
+                max-width: none !important;
+                width: 21cm !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            
+            /* Content pages in print: exactly 21cm wide, 2.5cm margins all around */
+            .page {
+                box-sizing: border-box !important;
+                background: white !important;
+                width: 21cm !important;
+                min-height: 29.7cm !important;
+                margin: 0 !important;
+                padding: 2.5cm !important;
+                box-shadow: none !important;
+                page-break-after: always !important;
+                page-break-inside: auto !important;
+                position: relative !important;
+                overflow: visible !important;
+            }
+            .page:last-child {
+                page-break-after: auto !important;
             }
 
-            /* Default cover page in print */
+            /* Default cover page in print: full A4 page, no extra printer margins */
             .page.cover-page {
                 box-sizing: border-box !important;
                 margin: 0 !important;
                 padding: 0 !important;
                 width: 21cm !important;
-                height: 29.65cm !important;
-                min-height: 29.65cm !important;
-                max-height: 29.65cm !important;
+                height: 29.7cm !important;
+                min-height: 29.7cm !important;
+                max-height: 29.7cm !important;
                 page-break-inside: avoid !important;
                 page-break-after: always !important;
                 overflow: hidden !important;
@@ -294,15 +314,15 @@
                 text-transform: uppercase !important;
             }
 
-            /* Fix cover image overflow in print */
+            /* Fix full-image cover overflow in print */
             #cover-page-wrapper {
                 box-sizing: border-box !important;
                 padding: 0 !important;
                 margin: 0 !important;
                 width: 21cm !important;
-                height: 29.65cm !important;
-                min-height: 29.65cm !important;
-                max-height: 29.65cm !important;
+                height: 29.7cm !important;
+                min-height: 29.7cm !important;
+                max-height: 29.7cm !important;
                 page-break-after: always !important;
                 page-break-inside: avoid !important;
                 overflow: hidden !important;
@@ -311,17 +331,6 @@
                 height: 100% !important;
                 width: 100% !important;
                 object-fit: cover !important;
-            }
-
-            /* Margin applied to every physical printed page */
-            @page {
-                size: A4;
-                margin: 2.5cm;
-            }
-
-            /* Remove margin only for the very first page (Cover) */
-            @page :first {
-                margin: 0mm;
             }
         }
     </style>
@@ -789,50 +798,53 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        var ctx = document.getElementById('predikatChart').getContext('2d');
-        var chartData = @json(array_values($chartData));
-        var chartLabels = @json(array_keys($chartData));
-        
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: chartLabels,
-                datasets: [{
-                    label: 'Jumlah Dosen per Predikat',
-                    data: chartData,
-                    backgroundColor: [
-                        'rgba(75, 192, 192, 0.6)',
-                        'rgba(54, 162, 235, 0.6)',
-                        'rgba(255, 206, 86, 0.6)',
-                        'rgba(255, 159, 64, 0.6)',
-                        'rgba(255, 99, 132, 0.6)'
-                    ],
-                    borderColor: [
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(255, 159, 64, 1)',
-                        'rgba(255, 99, 132, 1)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: { stepSize: 1 }
-                    }
+        var predikatElem = document.getElementById('predikatChart');
+        if (predikatElem) {
+            var ctx = predikatElem.getContext('2d');
+            var chartData = @json(array_values($chartData));
+            var chartLabels = @json(array_keys($chartData));
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        label: 'Jumlah Dosen per Predikat',
+                        data: chartData,
+                        backgroundColor: [
+                            'rgba(75, 192, 192, 0.6)',
+                            'rgba(54, 162, 235, 0.6)',
+                            'rgba(255, 206, 86, 0.6)',
+                            'rgba(255, 159, 64, 0.6)',
+                            'rgba(255, 99, 132, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(255, 159, 64, 1)',
+                            'rgba(255, 99, 132, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
                 },
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'bottom'
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom'
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
 
     });
 

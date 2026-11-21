@@ -400,21 +400,28 @@ class AdminController extends Controller
     {
         $raw = $periode ?: '';
         
-        $tahunAkademik = '';
-        $coverYear = date('Y');
-        
-        if (preg_match('/(\d{4})\s*[\/\-]\s*(\d{4})/', $raw, $m)) {
-            $tahunAkademik = "{$m[1]}/{$m[2]}";
-            $coverYear = $m[2];
-        } else {
-            $tahunAkademik = date('Y') . '/' . (date('Y') + 1);
-        }
-
         $semester = '';
         if (stripos($raw, 'genap') !== false) {
             $semester = 'Genap';
         } elseif (stripos($raw, 'ganjil') !== false) {
             $semester = 'Ganjil';
+        }
+
+        $tahunAkademik = '';
+        $coverYear = date('Y');
+        
+        if (preg_match('/(\d{4})\s*[\/\-]\s*(\d{4})/', $raw, $m)) {
+            $tahunAkademik = "{$m[1]}/{$m[2]}";
+            // Semester Ganjil berlangsung di tahun pertama ($m[1]), Semester Genap di tahun kedua ($m[2])
+            $coverYear = ($semester === 'Ganjil') ? $m[1] : $m[2];
+        } elseif (preg_match('/(\d{4})/', $raw, $m)) {
+            $coverYear = $m[1];
+            $tahunAkademik = ($semester === 'Ganjil')
+                ? $m[1] . '/' . ($m[1] + 1)
+                : ($m[1] - 1) . '/' . $m[1];
+        } else {
+            $tahunAkademik = date('Y') . '/' . (date('Y') + 1);
+            $coverYear = ($semester === 'Ganjil') ? date('Y') : (date('Y') + 1);
         }
 
         $periodeLabel = trim(preg_replace('/\s+/', ' ', str_ireplace('REGULER', '', $raw)));

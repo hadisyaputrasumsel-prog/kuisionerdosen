@@ -63,28 +63,27 @@
         
         /* Cover specific styling */
         .page.cover-page {
-            box-sizing: border-box;
-            background: white;
-            width: 21cm;
-            height: 29.6cm;
-            min-height: 29.6cm;
-            max-height: 29.6cm;
-            padding: 4.5cm 2.5cm 3.5cm 2.5cm;
-            margin: 2cm auto;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-            position: relative;
-            page-break-inside: avoid;
-            page-break-after: always;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            text-align: center;
+            box-sizing: border-box !important;
+            background: white !important;
+            width: 21cm !important;
+            height: 29.65cm !important;
+            min-height: 29.65cm !important;
+            max-height: 29.65cm !important;
+            padding: 0 !important;
+            margin: 2cm auto !important;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5) !important;
+            position: relative !important;
+            page-break-inside: avoid !important;
+            page-break-after: always !important;
+            overflow: hidden !important;
         }
         .cover-header {
-            width: 100%;
-            text-align: center;
+            position: absolute !important;
+            top: 4.5cm !important;
+            left: 2.5cm !important;
+            right: 2.5cm !important;
+            text-align: center !important;
+            width: calc(21cm - 5cm) !important;
         }
         .cover-title {
             font-size: 18pt;
@@ -113,11 +112,12 @@
             margin-bottom: 4px;
         }
         .cover-logo-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: auto 0;
-            width: 100%;
+            position: absolute !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            text-align: center !important;
+            width: auto !important;
         }
         .cover-logo {
             width: auto;
@@ -138,8 +138,12 @@
             margin: 0 auto;
         }
         .cover-footer {
-            width: 100%;
-            text-align: center;
+            position: absolute !important;
+            bottom: 3.5cm !important;
+            left: 2.5cm !important;
+            right: 2.5cm !important;
+            text-align: center !important;
+            width: calc(21cm - 5cm) !important;
             font-size: 16pt;
             font-weight: bold;
             line-height: 1.4;
@@ -203,21 +207,42 @@
             .page.cover-page {
                 box-sizing: border-box !important;
                 margin: 0 !important;
-                padding: 4.5cm 2.5cm 3.5cm 2.5cm !important;
+                padding: 0 !important;
                 width: 21cm !important;
-                height: 29.6cm !important;
-                min-height: 29.6cm !important;
-                max-height: 29.6cm !important;
+                height: 29.65cm !important;
+                min-height: 29.65cm !important;
+                max-height: 29.65cm !important;
                 page-break-inside: avoid !important;
                 page-break-after: always !important;
                 overflow: hidden !important;
-                display: flex !important;
-                flex-direction: column !important;
-                justify-content: space-between !important;
-                align-items: center !important;
-                text-align: center !important;
+                position: relative !important;
                 background: white !important;
                 box-shadow: none !important;
+                display: block !important;
+            }
+            .cover-header {
+                position: absolute !important;
+                top: 4.5cm !important;
+                left: 2.5cm !important;
+                right: 2.5cm !important;
+                text-align: center !important;
+                width: calc(21cm - 5cm) !important;
+            }
+            .cover-logo-wrapper {
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
+                text-align: center !important;
+                width: auto !important;
+            }
+            .cover-footer {
+                position: absolute !important;
+                bottom: 3.5cm !important;
+                left: 2.5cm !important;
+                right: 2.5cm !important;
+                text-align: center !important;
+                width: calc(21cm - 5cm) !important;
             }
 
             /* Fix cover image overflow in print */

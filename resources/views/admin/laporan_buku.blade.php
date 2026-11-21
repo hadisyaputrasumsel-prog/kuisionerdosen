@@ -66,40 +66,25 @@
             box-sizing: border-box;
             background: white;
             width: 21cm;
-            height: 29.7cm;
-            min-height: 29.7cm;
-            max-height: 29.7cm;
-            padding: 2.5cm;
+            height: 29.6cm;
+            min-height: 29.6cm;
+            max-height: 29.6cm;
+            padding: 4.5cm 2.5cm 3.5cm 2.5cm;
             margin: 2cm auto;
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
             position: relative;
             page-break-inside: avoid;
             page-break-after: always;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            text-align: center;
         }
-        table.cover-layout-table,
-        table.cover-layout-table tr,
-        table.cover-layout-table td {
-            border: none !important;
-            border-width: 0 !important;
-            box-shadow: none !important;
-            background: transparent !important;
-        }
-        .cover-layout-table {
-            width: 100% !important;
-            height: 24.5cm !important;
-            min-height: 24.5cm !important;
-            max-height: 24.5cm !important;
-            border-collapse: collapse !important;
-            margin: 0 auto !important;
-            padding: 0 !important;
-            table-layout: fixed !important;
-        }
-        .cover-header-cell {
-            vertical-align: top !important;
-            text-align: center !important;
-            padding: 0 !important;
-            height: 32% !important;
+        .cover-header {
+            width: 100%;
+            text-align: center;
         }
         .cover-title {
             font-size: 18pt;
@@ -127,35 +112,34 @@
         .cover-meta-item {
             margin-bottom: 4px;
         }
-        .cover-logo-cell {
-            vertical-align: middle !important;
-            text-align: center !important;
-            padding: 20px 0 !important;
-            height: 48% !important;
+        .cover-logo-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: auto 0;
+            width: 100%;
         }
         .cover-logo {
             width: auto;
             max-width: 220px;
             max-height: 220px;
             object-fit: contain;
-            display: inline-block;
+            display: block;
             margin: 0 auto;
         }
         .cover-logo-placeholder {
             height: 160px;
             width: 160px;
-            display: inline-flex;
+            display: flex;
             align-items: center;
             justify-content: center;
             border: 2px dashed #ccc;
             border-radius: 8px;
             margin: 0 auto;
         }
-        .cover-footer-cell {
-            vertical-align: bottom !important;
-            text-align: center !important;
-            padding: 0 !important;
-            height: 20% !important;
+        .cover-footer {
+            width: 100%;
+            text-align: center;
             font-size: 16pt;
             font-weight: bold;
             line-height: 1.4;
@@ -219,22 +203,21 @@
             .page.cover-page {
                 box-sizing: border-box !important;
                 margin: 0 !important;
-                padding: 0 !important;
-                width: 100% !important;
-                height: 24.5cm !important;
-                min-height: 24.5cm !important;
-                max-height: 24.5cm !important;
+                padding: 4.5cm 2.5cm 3.5cm 2.5cm !important;
+                width: 21cm !important;
+                height: 29.6cm !important;
+                min-height: 29.6cm !important;
+                max-height: 29.6cm !important;
                 page-break-inside: avoid !important;
                 page-break-after: always !important;
                 overflow: hidden !important;
-                display: block !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                text-align: center !important;
                 background: white !important;
-            }
-            .page.cover-page .cover-layout-table {
-                width: 100% !important;
-                height: 24.5cm !important;
-                min-height: 24.5cm !important;
-                max-height: 24.5cm !important;
+                box-shadow: none !important;
             }
 
             /* Fix cover image overflow in print */
@@ -292,50 +275,42 @@
     </div>
     @else
     <div class="page cover-page">
-        <table class="cover-layout-table">
-            <tbody>
-                <tr>
-                    <td class="cover-header-cell">
-                        <div class="cover-title">LAPORAN HASIL SURVEY KEPUASAN MAHASISWA</div>
-                        <div class="cover-subtitle">TERHADAP DOSEN DALAM PENGAJARAN</div>
-                        
-                        <div class="cover-meta">
-                            <div class="cover-meta-item">
-                                SEMESTER {{ strtoupper($semester ?? '') }} TAHUN AKADEMIK {{ $tahunAkademik ?? '' }}
-                            </div>
-                            
-                            @if(request('prodi_id'))
-                                <div class="cover-meta-item">
-                                    PROGRAM STUDI {{ strtoupper($prodis->firstWhere('id', request('prodi_id'))->name ?? '') }}
-                                </div>
-                            @else
-                                <div class="cover-meta-item">
-                                    TINGKAT UNIVERSITAS
-                                </div>
-                            @endif
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="cover-logo-cell">
-                        @if(!empty($config['cover']))
-                            <img src="{{ asset($config['cover']) }}" alt="Logo / Sampul" class="cover-logo">
-                        @else
-                            <!-- Placeholder if no cover uploaded -->
-                            <div class="cover-logo-placeholder">
-                                <span class="text-muted fw-bold">[Logo Kampus]</span>
-                            </div>
-                        @endif
-                    </td>
-                </tr>
-                <tr>
-                    <td class="cover-footer-cell">
-                        UNIVERSITAS SUMATERA SELATAN<br>
-                        TAHUN {{ $coverYear ?? date('Y') }}
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="cover-header">
+            <div class="cover-title">LAPORAN HASIL SURVEY KEPUASAN MAHASISWA</div>
+            <div class="cover-subtitle">TERHADAP DOSEN DALAM PENGAJARAN</div>
+            
+            <div class="cover-meta">
+                <div class="cover-meta-item">
+                    SEMESTER {{ strtoupper($semester ?? '') }} TAHUN AKADEMIK {{ $tahunAkademik ?? '' }}
+                </div>
+                
+                @if(request('prodi_id'))
+                    <div class="cover-meta-item">
+                        PROGRAM STUDI {{ strtoupper($prodis->firstWhere('id', request('prodi_id'))->name ?? '') }}
+                    </div>
+                @else
+                    <div class="cover-meta-item">
+                        TINGKAT UNIVERSITAS
+                    </div>
+                @endif
+            </div>
+        </div>
+
+        <div class="cover-logo-wrapper">
+            @if(!empty($config['cover']))
+                <img src="{{ asset($config['cover']) }}" alt="Logo / Sampul" class="cover-logo">
+            @else
+                <!-- Placeholder if no cover uploaded -->
+                <div class="cover-logo-placeholder">
+                    <span class="text-muted fw-bold">[Logo Kampus]</span>
+                </div>
+            @endif
+        </div>
+
+        <div class="cover-footer">
+            UNIVERSITAS SUMATERA SELATAN<br>
+            TAHUN {{ $coverYear ?? date('Y') }}
+        </div>
     </div>
     @endif
 

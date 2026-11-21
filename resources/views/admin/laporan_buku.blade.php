@@ -76,79 +76,84 @@
             page-break-inside: avoid !important;
             page-break-after: always !important;
             overflow: hidden !important;
+            font-family: 'Times New Roman', Times, serif !important;
+            color: #000 !important;
         }
         .cover-header {
             position: absolute !important;
-            top: 4.5cm !important;
-            left: 2.5cm !important;
-            right: 2.5cm !important;
+            top: 3.8cm !important;
+            left: 3cm !important;
+            right: 3cm !important;
+            width: calc(21cm - 6cm) !important;
             text-align: center !important;
-            width: calc(21cm - 5cm) !important;
         }
         .cover-title {
-            font-size: 18pt;
-            font-weight: bold;
-            line-height: 1.35;
-            margin-bottom: 8px;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
+            font-size: 14pt !important;
+            font-weight: bold !important;
+            line-height: 1.4 !important;
+            margin-bottom: 6px !important;
+            letter-spacing: 0.5px !important;
+            text-transform: uppercase !important;
+            text-align: center !important;
         }
         .cover-subtitle {
-            font-size: 14pt;
-            font-weight: bold;
-            line-height: 1.35;
-            margin-bottom: 25px;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
+            font-size: 12pt !important;
+            font-weight: bold !important;
+            line-height: 1.4 !important;
+            margin-bottom: 22px !important;
+            letter-spacing: 0.5px !important;
+            text-transform: uppercase !important;
+            text-align: center !important;
         }
         .cover-meta {
-            font-size: 13pt;
-            font-weight: bold;
-            line-height: 1.45;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
+            font-size: 12pt !important;
+            font-weight: bold !important;
+            line-height: 1.45 !important;
+            letter-spacing: 0.5px !important;
+            text-transform: uppercase !important;
+            text-align: center !important;
         }
         .cover-meta-item {
-            margin-bottom: 4px;
+            margin-bottom: 4px !important;
         }
         .cover-logo-wrapper {
             position: absolute !important;
-            top: 50% !important;
+            top: 55% !important;
             left: 50% !important;
             transform: translate(-50%, -50%) !important;
             text-align: center !important;
             width: auto !important;
         }
         .cover-logo {
-            width: auto;
-            max-width: 220px;
-            max-height: 220px;
-            object-fit: contain;
-            display: block;
-            margin: 0 auto;
+            width: auto !important;
+            max-width: 170px !important;
+            max-height: 170px !important;
+            object-fit: contain !important;
+            display: block !important;
+            margin: 0 auto !important;
         }
         .cover-logo-placeholder {
-            height: 160px;
-            width: 160px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px dashed #ccc;
-            border-radius: 8px;
-            margin: 0 auto;
+            height: 150px !important;
+            width: 150px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            border: 2px dashed #999 !important;
+            border-radius: 6px !important;
+            margin: 0 auto !important;
         }
         .cover-footer {
             position: absolute !important;
-            bottom: 3.5cm !important;
-            left: 2.5cm !important;
-            right: 2.5cm !important;
+            bottom: 4.5cm !important;
+            left: 3cm !important;
+            right: 3cm !important;
+            width: calc(21cm - 6cm) !important;
             text-align: center !important;
-            width: calc(21cm - 5cm) !important;
-            font-size: 16pt;
-            font-weight: bold;
-            line-height: 1.4;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
+            font-size: 14pt !important;
+            font-weight: bold !important;
+            line-height: 1.4 !important;
+            letter-spacing: 0.5px !important;
+            text-transform: uppercase !important;
         }
 
         /* Ensure uploaded cover fills the A4 box on screen */
@@ -219,30 +224,74 @@
                 background: white !important;
                 box-shadow: none !important;
                 display: block !important;
+                font-family: 'Times New Roman', Times, serif !important;
+                color: #000 !important;
             }
             .cover-header {
                 position: absolute !important;
-                top: 4.5cm !important;
-                left: 2.5cm !important;
-                right: 2.5cm !important;
+                top: 3.8cm !important;
+                left: 3cm !important;
+                right: 3cm !important;
+                width: calc(21cm - 6cm) !important;
                 text-align: center !important;
-                width: calc(21cm - 5cm) !important;
+            }
+            .cover-title {
+                font-size: 14pt !important;
+                font-weight: bold !important;
+                line-height: 1.4 !important;
+                margin-bottom: 6px !important;
+                letter-spacing: 0.5px !important;
+                text-transform: uppercase !important;
+                text-align: center !important;
+            }
+            .cover-subtitle {
+                font-size: 12pt !important;
+                font-weight: bold !important;
+                line-height: 1.4 !important;
+                margin-bottom: 22px !important;
+                letter-spacing: 0.5px !important;
+                text-transform: uppercase !important;
+                text-align: center !important;
+            }
+            .cover-meta {
+                font-size: 12pt !important;
+                font-weight: bold !important;
+                line-height: 1.45 !important;
+                letter-spacing: 0.5px !important;
+                text-transform: uppercase !important;
+                text-align: center !important;
+            }
+            .cover-meta-item {
+                margin-bottom: 4px !important;
             }
             .cover-logo-wrapper {
                 position: absolute !important;
-                top: 50% !important;
+                top: 55% !important;
                 left: 50% !important;
                 transform: translate(-50%, -50%) !important;
                 text-align: center !important;
                 width: auto !important;
             }
+            .cover-logo {
+                width: auto !important;
+                max-width: 170px !important;
+                max-height: 170px !important;
+                object-fit: contain !important;
+                display: block !important;
+                margin: 0 auto !important;
+            }
             .cover-footer {
                 position: absolute !important;
-                bottom: 3.5cm !important;
-                left: 2.5cm !important;
-                right: 2.5cm !important;
+                bottom: 4.5cm !important;
+                left: 3cm !important;
+                right: 3cm !important;
+                width: calc(21cm - 6cm) !important;
                 text-align: center !important;
-                width: calc(21cm - 5cm) !important;
+                font-size: 14pt !important;
+                font-weight: bold !important;
+                line-height: 1.4 !important;
+                letter-spacing: 0.5px !important;
+                text-transform: uppercase !important;
             }
 
             /* Fix cover image overflow in print */

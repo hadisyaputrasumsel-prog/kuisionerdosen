@@ -35,10 +35,16 @@ class AdminController extends Controller
             'total_responden' => \App\Models\Evaluation::whereIn('jadwal_id', (clone $query)->pluck('id'))->count(),
         ];
 
-        // Jadwal per Prodi (filtered by period)
-        $jadwalPerProdi = Prodi::withCount(['jadwals' => function($q) use ($request) {
-            if ($request->filled('periode')) $q->where('periode', $request->periode);
-        }])->get();
+        // Jadwal per Prodi (filtered by period, deduplicated by name)
+        $jadwalPerProdi = $this->getUniqueProdis()->map(function($prodi) use ($request) {
+            $matchingIds = $this->resolveProdiIds($prodi->id);
+            $q = \App\Models\Jadwal::whereIn('prodi_id', $matchingIds);
+            if ($request->filled('periode')) {
+                $q->where('periode', $request->periode);
+            }
+            $prodi->jadwals_count = $q->count();
+            return $prodi;
+        });
 
         // Mengambil semua jadwal yang sesuai dengan filter beserta jumlah evaluasinya
         $jadwals = (clone $query)->with('dosen')
@@ -85,12 +91,12 @@ class AdminController extends Controller
         }
         
         if ($request->filled('prodi_id')) {
-            $query->where('prodi_id', $request->prodi_id);
+            $query->whereIn('prodi_id', $this->resolveProdiIds($request->prodi_id));
         }
 
         $jadwals = $query->paginate(20);
         $filterPeriodes = $this->getSortedPeriodes();
-        $prodis = \App\Models\Prodi::orderBy('name')->get();
+        $prodis = $this->getUniqueProdis();
         $periodes = \App\Models\Periode::all()->sort(function($a, $b) {
             return $this->getPeriodeSortKey($b->name) <=> $this->getPeriodeSortKey($a->name);
         })->values();
@@ -377,6 +383,38 @@ class AdminController extends Controller
     }
 
     /**
+     * Get unique prodis ordered by uppercase name to prevent duplicate options in dropdowns.
+     */
+    private function getUniqueProdis()
+    {
+        return \App\Models\Prodi::all()
+            ->unique(function ($p) {
+                return strtoupper(trim($p->name));
+            })
+            ->sortBy(function ($p) {
+                return strtoupper(trim($p->name));
+            })
+            ->values();
+    }
+
+    /**
+     * Resolve matching prodi IDs including case-insensitive duplicates.
+     */
+    private function resolveProdiIds($prodiId): array
+    {
+        if (empty($prodiId)) {
+            return [];
+        }
+        $prodi = \App\Models\Prodi::find($prodiId);
+        if (!$prodi) {
+            return [(int) $prodiId];
+        }
+        return \App\Models\Prodi::whereRaw('UPPER(TRIM(name)) = ?', [strtoupper(trim($prodi->name))])
+            ->pluck('id')
+            ->toArray();
+    }
+
+    /**
      * Get sorted list of periods in reverse chronological order (newest to oldest).
      */
     private function getSortedPeriodes()
@@ -412,16 +450,16 @@ class AdminController extends Controller
         
         if (preg_match('/(\d{4})\s*[\/\-]\s*(\d{4})/', $raw, $m)) {
             $tahunAkademik = "{$m[1]}/{$m[2]}";
-            // Semester Ganjil berlangsung di tahun pertama ($m[1]), Semester Genap di tahun kedua ($m[2])
-            $coverYear = ($semester === 'Ganjil') ? $m[1] : $m[2];
+            // Tahun laporan dan penandatanganan selalu tahun akhir periode akademik ($m[2], misal: 2023/2024 -> 2024)
+            $coverYear = $m[2];
         } elseif (preg_match('/(\d{4})/', $raw, $m)) {
-            $coverYear = $m[1];
+            $coverYear = (string) $m[1];
             $tahunAkademik = ($semester === 'Ganjil')
                 ? $m[1] . '/' . ($m[1] + 1)
                 : ($m[1] - 1) . '/' . $m[1];
         } else {
             $tahunAkademik = date('Y') . '/' . (date('Y') + 1);
-            $coverYear = ($semester === 'Ganjil') ? date('Y') : (date('Y') + 1);
+            $coverYear = (string) (date('Y') + 1);
         }
 
         $periodeLabel = trim(preg_replace('/\s+/', ' ', str_ireplace('REGULER', '', $raw)));
@@ -481,21 +519,62 @@ class AdminController extends Controller
             $text
         );
 
+        // 1. Dinamisasi "Semester ... Tahun Akademik ..."
         $text = preg_replace(
-            '/(Tahun\s+Akademik\s+)\d{4}\s*[\/\-]\s*\d{4}\s+(Genap|Ganjil)(\s+Reguler)?/i',
-            '${1}' . $pComp['tahunAkademik'] . ' ' . $pComp['semester'] . '${3}',
+            '/Semester\s+(?:Genap|Ganjil)?\s*Tahun\s+Akademik\s+\d{4}\s*[\/\-]\s*\d{4}/i',
+            'Semester ' . $pComp['semester'] . ' Tahun Akademik ' . $pComp['tahunAkademik'],
+            $text
+        );
+
+        // 2. Dinamisasi Waktu Pelaksanaan Survei: "Akhir Semester [SEMESTER] [TAHUN_AKADEMIK]"
+        $waktuPelaksanaan = "Akhir Semester {$pComp['semester']} {$pComp['tahunAkademik']}";
+        $text = preg_replace(
+            '/(Waktu\s+pelaksanaan\s+survei\s*[:\-]?\s*)(?:Akhir\s+Semester\s+)?(?:Genap|Ganjil)?\s*(?:Tahun\s+Akademik\s+)?\d{4}\s*[\/\-]\s*\d{4}/i',
+            '${1}' . $waktuPelaksanaan,
             $text
         );
         $text = preg_replace(
-            '/(Semester\s+)(Genap|Ganjil)(\s+Tahun\s+Akademik\s+)\d{4}\s*[\/\-]\s*\d{4}/i',
-            '${1}' . $pComp['semester'] . '${3}' . $pComp['tahunAkademik'],
+            '/Akhir\s+Semester\s+(?:Genap|Ganjil)\s+\d{4}\s*[\/\-]\s*\d{4}/i',
+            $waktuPelaksanaan,
             $text
         );
+
+        // 3. Dinamisasi "Tahun Akademik YYYY/YYYY (Genap|Ganjil)"
+        $text = preg_replace(
+            '/Tahun\s+Akademik\s+\d{4}\s*[\/\-]\s*\d{4}\s+(Genap|Ganjil)(\s+Reguler)?/i',
+            'Tahun Akademik ' . $pComp['tahunAkademik'] . ' ' . $pComp['semester'] . '${2}',
+            $text
+        );
+
+        // 4. Standalone "Tahun Akademik YYYY/YYYY"
+        $text = preg_replace(
+            '/Tahun\s+Akademik\s+\d{4}\s*[\/\-]\s*\d{4}(?!\s*(?:Genap|Ganjil))/i',
+            'Tahun Akademik ' . $pComp['tahunAkademik'],
+            $text
+        );
+
+        // 5. Dinamisasi kalimat Bab 3: "dilakukan pada bulan ..."
+        $text = preg_replace(
+            '/(dilakukan\s+pada\s+bulan\s+)[^<,.]+/i',
+            '${1}akhir Semester ' . $pComp['semester'] . ' Tahun Akademik ' . $pComp['tahunAkademik'],
+            $text
+        );
+
+        // 6. Dinamisasi Kota dan Tahun tanda tangan di Palembang
         $text = preg_replace(
             '/(Palembang,\s*(?:&nbsp;|\s)*)\d{4}/i',
             'Palembang, ' . $pComp['coverYear'],
             $text
         );
+
+        // Bungkus blok tanda tangan agar tidak terpisah/terpotong antar halaman saat dicetak
+        if (preg_match('/(<p[^>]*>\s*(?:<strong>)?\s*(?:<span[^>]*>)?\s*Palembang,.*?<\/p>.*)$/is', $text, $sigMatch)) {
+            $sigContent = $sigMatch[1];
+            if (!str_contains($sigContent, 'signature-block')) {
+                $wrappedSig = '<div class="signature-block" style="page-break-inside: avoid; break-inside: avoid; margin-top: 15px;">' . $sigContent . '</div>';
+                $text = substr($text, 0, -strlen($sigContent)) . $wrappedSig;
+            }
+        }
 
         return $text;
     }
@@ -519,7 +598,7 @@ class AdminController extends Controller
             $query->where('periode', $request->periode);
         }
         if ($request->filled('prodi_id')) {
-            $query->where('prodi_id', $request->prodi_id);
+            $query->whereIn('prodi_id', $this->resolveProdiIds($request->prodi_id));
         }
 
         $jadwals = $query->get();
@@ -527,7 +606,7 @@ class AdminController extends Controller
         $this->calculateJadwalScores($jadwals);
 
         $filterPeriodes = $this->getSortedPeriodes();
-        $prodis = \App\Models\Prodi::orderBy('name')->get();
+        $prodis = $this->getUniqueProdis();
 
         $pComp = $this->parsePeriodeComponents($request->periode);
         $tahunAkademik = $pComp['tahunAkademik'];
@@ -611,7 +690,7 @@ class AdminController extends Controller
             $query->where('periode', $request->periode);
         }
         if ($request->filled('prodi_id')) {
-            $query->where('prodi_id', $request->prodi_id);
+            $query->whereIn('prodi_id', $this->resolveProdiIds($request->prodi_id));
         }
 
         $jadwals = $query->get();
@@ -723,7 +802,7 @@ class AdminController extends Controller
             $query->where('periode', $request->periode);
         }
         if ($request->filled('prodi_id')) {
-            $query->where('prodi_id', $request->prodi_id);
+            $query->whereIn('prodi_id', $this->resolveProdiIds($request->prodi_id));
         }
 
         $jadwals = $query->get();
@@ -747,7 +826,7 @@ class AdminController extends Controller
         }
 
         $config = $this->loadReportConfig($request->prodi_id, $request->periode);
-        $prodis = \App\Models\Prodi::orderBy('name')->get();
+        $prodis = $this->getUniqueProdis();
 
         $pComp = $this->parsePeriodeComponents($request->periode);
         $tahunAkademik = $pComp['tahunAkademik'];
@@ -837,6 +916,15 @@ class AdminController extends Controller
             $overallPredikat
         );
 
+        $bab3Content = $this->formatDynamicReportText(
+            $config['bab3'] ?? '',
+            $pComp,
+            $activeProdiName,
+            $activeTotalResponden,
+            $activeTotalDosen,
+            $overallPredikat
+        );
+
         $lembarPengesahanContent = $this->formatDynamicReportText(
             $config['lembar_pengesahan'] ?? '',
             $pComp,
@@ -860,6 +948,7 @@ class AdminController extends Controller
             'kataPengantarContent',
             'bab1Content',
             'bab2Content',
+            'bab3Content',
             'lembarPengesahanContent'
         ));
     }

@@ -50,6 +50,27 @@
             font-size: 12pt;
         }
         
+        /* Kata Pengantar compact single page layout & signature protection */
+        .kata-pengantar-page {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+        }
+        .kata-pengantar-page .content-text {
+            line-height: 1.4 !important;
+            font-size: 11.5pt !important;
+        }
+        .kata-pengantar-page .content-text p {
+            margin-top: 0 !important;
+            margin-bottom: 0.5rem !important;
+        }
+        .kata-pengantar-page .content-text p:empty {
+            display: none !important;
+        }
+        .signature-block {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+        }
+        
         /* Formating for tables created from TinyMCE */
         .content-text table {
             width: 100%;
@@ -226,6 +247,28 @@
             }
             .page:last-child {
                 page-break-after: auto !important;
+            }
+
+            /* Kata Pengantar in print: guaranteed single page & non-breaking signature */
+            .kata-pengantar-page {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                page-break-after: always !important;
+            }
+            .kata-pengantar-page .content-text {
+                line-height: 1.4 !important;
+                font-size: 11.5pt !important;
+            }
+            .kata-pengantar-page .content-text p {
+                margin-top: 0 !important;
+                margin-bottom: 0.5rem !important;
+            }
+            .kata-pengantar-page .content-text p:empty {
+                display: none !important;
+            }
+            .signature-block {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
             }
 
             /* Default cover page in print: full A4 page, no extra printer margins */
@@ -407,7 +450,7 @@
 
     <!-- KATA PENGANTAR -->
     @if(!empty($kataPengantarContent ?? $config['kata_pengantar'] ?? null))
-    <div class="page">
+    <div class="page kata-pengantar-page">
         <div class="chapter-title">KATA PENGANTAR</div>
         <div class="content-text">{!! $kataPengantarContent ?? $config['kata_pengantar'] !!}</div>
     </div>
@@ -441,7 +484,7 @@
     <div class="page">
         <div class="chapter-title">BAB III<br>HASIL EVALUASI</div>
         @php
-            $bab3Content = $config['bab3'] ?? '';
+            $bab3Content = $bab3Content ?? ($config['bab3'] ?? '');
             $hasPieChart = str_contains($bab3Content, '[PIE_CHART_DOSEN]');
             $dosenLabels = [];
             $dosenData = [];

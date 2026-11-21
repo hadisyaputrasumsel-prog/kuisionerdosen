@@ -46,25 +46,25 @@
         }
         .content-text {
             text-align: justify;
-            line-height: 1.5;
-            font-size: 12pt;
+            line-height: 1.4 !important;
+            font-size: 11.5pt;
+        }
+        .content-text p {
+            margin-top: 0 !important;
+            margin-bottom: 0.45rem !important;
+            orphans: 3 !important;
+            widows: 3 !important;
+        }
+        .content-text p:empty {
+            display: none !important;
         }
         
-        /* Kata Pengantar compact single page layout & signature protection */
-        .kata-pengantar-page {
+        /* Single-page sections (Lembar Pengesahan, Kata Pengantar, Bab I) & signature protection */
+        .single-page-content,
+        .kata-pengantar-page,
+        .bab1-page {
             page-break-inside: avoid !important;
             break-inside: avoid !important;
-        }
-        .kata-pengantar-page .content-text {
-            line-height: 1.4 !important;
-            font-size: 11.5pt !important;
-        }
-        .kata-pengantar-page .content-text p {
-            margin-top: 0 !important;
-            margin-bottom: 0.5rem !important;
-        }
-        .kata-pengantar-page .content-text p:empty {
-            display: none !important;
         }
         .signature-block {
             page-break-inside: avoid !important;
@@ -249,22 +249,28 @@
                 page-break-after: auto !important;
             }
 
-            /* Kata Pengantar in print: guaranteed single page & non-breaking signature */
-            .kata-pengantar-page {
-                page-break-inside: avoid !important;
-                break-inside: avoid !important;
-                page-break-after: always !important;
-            }
-            .kata-pengantar-page .content-text {
+            .content-text {
+                text-align: justify;
                 line-height: 1.4 !important;
                 font-size: 11.5pt !important;
             }
-            .kata-pengantar-page .content-text p {
+            .content-text p {
                 margin-top: 0 !important;
-                margin-bottom: 0.5rem !important;
+                margin-bottom: 0.45rem !important;
+                orphans: 3 !important;
+                widows: 3 !important;
             }
-            .kata-pengantar-page .content-text p:empty {
+            .content-text p:empty {
                 display: none !important;
+            }
+
+            /* Single-page sections in print: guaranteed single page & non-breaking content */
+            .single-page-content,
+            .kata-pengantar-page,
+            .bab1-page {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                page-break-after: always !important;
             }
             .signature-block {
                 page-break-inside: avoid !important;
@@ -442,7 +448,7 @@
 
     <!-- LEMBAR PENGESAHAN -->
     @if(!empty($lembarPengesahanContent ?? $config['lembar_pengesahan'] ?? null))
-    <div class="page">
+    <div class="page single-page-content">
         <div class="chapter-title">LEMBAR PENGESAHAN</div>
         <div class="content-text">{!! $lembarPengesahanContent ?? $config['lembar_pengesahan'] !!}</div>
     </div>
@@ -457,7 +463,7 @@
     @endif
 
     <!-- DAFTAR ISI -->
-    <div class="page">
+    <div class="page single-page-content">
         <div class="chapter-title">DAFTAR ISI</div>
         <div class="content-text" id="auto-toc">
             <!-- Auto TOC injected via JS -->
@@ -466,7 +472,7 @@
 
     <!-- BAB I -->
     @if(!empty($bab1Content ?? $config['bab1'] ?? null))
-    <div class="page">
+    <div class="page bab1-page">
         <div class="chapter-title">BAB I<br>PENDAHULUAN</div>
         <div class="content-text">{!! $bab1Content ?? $config['bab1'] !!}</div>
     </div>
@@ -811,7 +817,7 @@
 
     <!-- LAMPIRAN 3: SURAT TUGAS -->
     @if(!empty($config['surat_tugas']))
-    <div class="page">
+    <div class="page single-page-content">
         <div class="chapter-title">LAMPIRAN 3<br>SURAT TUGAS / KEPUTUSAN</div>
         <div style="text-align: center; margin-top: 2rem;">
             <img src="{{ asset($config['surat_tugas']) }}" style="max-width: 100%; max-height: 22cm; object-fit: contain;">
@@ -821,7 +827,7 @@
 
     <!-- LAMPIRAN 4: DOKUMENTASI -->
     @if(!empty($config['dokumentasi']))
-    <div class="page">
+    <div class="page single-page-content">
         <div class="chapter-title">LAMPIRAN 4<br>DOKUMENTASI PELAKSANAAN</div>
         <div style="text-align: center; margin-top: 2rem;">
             <img src="{{ asset($config['dokumentasi']) }}" style="max-width: 100%; max-height: 22cm; object-fit: contain;">

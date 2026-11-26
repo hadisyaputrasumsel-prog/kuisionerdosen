@@ -8,6 +8,15 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        (function() {
+            try {
+                if (localStorage.getItem('sidebar_collapsed') === 'true' && window.innerWidth >= 992) {
+                    document.documentElement.classList.add('sidebar-is-collapsed');
+                }
+            } catch(e) {}
+        })();
+    </script>
     <style>
         body { background-color: #f1f5f9; font-family: 'Inter', sans-serif; color: #334155; }
         
@@ -17,6 +26,77 @@
         .sidebar-link:hover { background-color: rgba(255,255,255,0.05); color: #f8fafc !important; }
         .active-menu { background-color: rgba(255,255,255,0.1) !important; font-weight: 600; border-left: 4px solid #38bdf8 !important; border-radius: 0 12px 12px 0; margin-right: 1rem; color: #ffffff !important; box-shadow: 0 4px 15px rgba(0,0,0,0.1); backdrop-filter: blur(10px); }
         
+        /* Sidebar show/hide & transitions */
+        #adminSidebar {
+            width: 280px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+            z-index: 1050;
+            left: 0;
+            top: 0;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #mainContent {
+            margin-left: 280px;
+            min-height: 100vh;
+            width: calc(100% - 280px);
+            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Collapsed State */
+        body.sidebar-collapsed #adminSidebar {
+            transform: translateX(-280px) !important;
+        }
+        body.sidebar-collapsed #mainContent {
+            margin-left: 0 !important;
+            width: 100% !important;
+        }
+        
+        /* Pre-render anti-flicker */
+        html.sidebar-is-collapsed #adminSidebar {
+            transform: translateX(-280px) !important;
+            transition: none !important;
+        }
+        html.sidebar-is-collapsed #mainContent {
+            margin-left: 0 !important;
+            width: 100% !important;
+            transition: none !important;
+        }
+
+        /* Mobile overlay */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(2px);
+            z-index: 1040;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .sidebar-overlay.show {
+            display: block;
+            opacity: 1;
+        }
+
+        @media (max-width: 991.98px) {
+            #adminSidebar {
+                transform: translateX(-280px);
+            }
+            #adminSidebar.mobile-show {
+                transform: translateX(0) !important;
+            }
+            #mainContent {
+                margin-left: 0 !important;
+                width: 100% !important;
+            }
+        }
+
         /* Premium Cards */
         .premium-card { background: white; border-radius: 20px; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05); border: 1px solid rgba(255,255,255,0.8); transition: transform 0.3s ease, box-shadow 0.3s ease; }
         .premium-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px -10px rgba(0,0,0,0.08); }
@@ -36,15 +116,25 @@
 </head>
 <body>
 
+<!-- Mobile Sidebar Backdrop Overlay -->
+<div id="sidebarOverlay" class="sidebar-overlay no-print"></div>
+
 <div class="d-flex" style="min-height: 100vh;">
     <!-- Sidebar -->
-    <div class="sidebar-bg text-white py-4 d-flex flex-column" style="width: 280px; position: fixed; height: 100vh; overflow-y: auto; box-shadow: 4px 0 20px rgba(0,0,0,0.15); z-index: 1000;">
-        <div class="text-center mb-5 px-3">
-            <div class="d-inline-flex align-items-center justify-content-center bg-white rounded-circle mb-3 shadow" style="width: 60px; height: 60px;">
-                <i class="bi bi-bar-chart-fill fs-2 text-primary"></i>
+    <div id="adminSidebar" class="sidebar-bg text-white py-4 d-flex flex-column no-print">
+        <div class="d-flex align-items-center justify-content-between px-3 mb-4 pb-2 border-bottom border-white-50 border-opacity-10">
+            <div class="d-flex align-items-center gap-2">
+                <div class="d-inline-flex align-items-center justify-content-center bg-white rounded-circle shadow" style="width: 44px; height: 44px;">
+                    <i class="bi bi-bar-chart-fill fs-4 text-primary"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-0 tracking-wider text-white">ADMIN PANEL</h5>
+                    <small class="text-info opacity-75 fw-medium" style="font-size: 0.75rem;">Sistem Kuisioner Dosen</small>
+                </div>
             </div>
-            <h5 class="fw-bold mb-0 tracking-wider text-white">ADMIN PANEL</h5>
-            <small class="text-info opacity-75 fw-medium">Sistem Kuisioner Dosen</small>
+            <button id="sidebarCollapseBtn" class="btn btn-sm text-white-50 p-1 border-0" type="button" title="Sembunyikan Menu">
+                <i class="bi bi-chevron-left fs-5"></i>
+            </button>
         </div>
         
         <div class="px-4 mb-2 text-secondary small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 1.5px;">Menu Utama</div>
@@ -96,13 +186,18 @@
     </div>
 
     <!-- Main Content -->
-    <div class="flex-grow-1 p-4 p-md-5" style="margin-left: 280px; min-height: 100vh;">
+    <div id="mainContent" class="flex-grow-1 p-4 p-md-5">
         
         <!-- Header Section -->
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-5">
-            <div>
-                <h2 class="fw-extrabold text-dark mb-1" style="font-weight: 800;">Dashboard & Statistik</h2>
-                <p class="text-muted fw-medium mb-0">Ringkasan performa dan data evaluasi dosen.</p>
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-5 gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <button id="sidebarToggle" class="btn btn-white bg-white border shadow-sm text-secondary d-inline-flex align-items-center justify-content-center" style="width: 42px; height: 42px; border-radius: 10px;" type="button" title="Sembunyikan/Tampilkan Menu">
+                    <i class="bi bi-list fs-4"></i>
+                </button>
+                <div>
+                    <h2 class="fw-extrabold text-dark mb-1" style="font-weight: 800;">Dashboard & Statistik</h2>
+                    <p class="text-muted fw-medium mb-0">Ringkasan performa dan data evaluasi dosen.</p>
+                </div>
             </div>
             
             <!-- Filter -->
@@ -192,6 +287,64 @@
 
         <script>
             document.addEventListener("DOMContentLoaded", function() {
+                // Sidebar Toggle & Collapse Logic
+                const body = document.body;
+                const toggleBtn = document.getElementById('sidebarToggle');
+                const collapseBtn = document.getElementById('sidebarCollapseBtn');
+                const overlay = document.getElementById('sidebarOverlay');
+                const sidebar = document.getElementById('adminSidebar');
+
+                if (window.innerWidth >= 992) {
+                    if (localStorage.getItem('sidebar_collapsed') === 'true') {
+                        body.classList.add('sidebar-collapsed');
+                    } else {
+                        body.classList.remove('sidebar-collapsed');
+                    }
+                }
+                document.documentElement.classList.remove('sidebar-is-collapsed');
+
+                function triggerChartResize() {
+                    setTimeout(function() {
+                        window.dispatchEvent(new Event('resize'));
+                    }, 320);
+                }
+
+                function toggleSidebar() {
+                    if (window.innerWidth >= 992) {
+                        body.classList.toggle('sidebar-collapsed');
+                        const isCollapsed = body.classList.contains('sidebar-collapsed');
+                        localStorage.setItem('sidebar_collapsed', isCollapsed ? 'true' : 'false');
+                        triggerChartResize();
+                    } else {
+                        if (sidebar) {
+                            const isShown = sidebar.classList.toggle('mobile-show');
+                            if (overlay) {
+                                overlay.classList.toggle('show', isShown);
+                            }
+                        }
+                    }
+                }
+
+                function closeSidebar() {
+                    if (window.innerWidth >= 992) {
+                        body.classList.add('sidebar-collapsed');
+                        localStorage.setItem('sidebar_collapsed', 'true');
+                        triggerChartResize();
+                    } else {
+                        if (sidebar) sidebar.classList.remove('mobile-show');
+                        if (overlay) overlay.classList.remove('show');
+                    }
+                }
+
+                if (toggleBtn) toggleBtn.addEventListener('click', toggleSidebar);
+                if (collapseBtn) collapseBtn.addEventListener('click', closeSidebar);
+                if (overlay) {
+                    overlay.addEventListener('click', function() {
+                        if (sidebar) sidebar.classList.remove('mobile-show');
+                        overlay.classList.remove('show');
+                    });
+                }
+
                 // Konfigurasi Font Default ChartJS
                 Chart.defaults.font.family = "'Inter', sans-serif";
                 Chart.defaults.color = '#64748b';

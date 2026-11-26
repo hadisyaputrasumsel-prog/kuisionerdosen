@@ -7,6 +7,15 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function() {
+            try {
+                if (localStorage.getItem('sidebar_collapsed') === 'true' && window.innerWidth >= 992) {
+                    document.documentElement.classList.add('sidebar-is-collapsed');
+                }
+            } catch(e) {}
+        })();
+    </script>
     <style>
         body { background-color: #f8f9fa; }
         .sidebar-link { transition: 0.2s; border-left: 4px solid transparent; border-radius: 0 8px 8px 0; margin-right: 1rem; }
@@ -20,16 +29,101 @@
             color: white;
             border: none;
         }
+
+        /* Sidebar show/hide & transitions */
+        #adminSidebar {
+            width: 280px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+            z-index: 1050;
+            left: 0;
+            top: 0;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #mainContent {
+            margin-left: 280px;
+            min-height: 100vh;
+            width: calc(100% - 280px);
+            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Collapsed State */
+        body.sidebar-collapsed #adminSidebar {
+            transform: translateX(-280px) !important;
+        }
+        body.sidebar-collapsed #mainContent {
+            margin-left: 0 !important;
+            width: 100% !important;
+        }
+        
+        /* Pre-render anti-flicker */
+        html.sidebar-is-collapsed #adminSidebar {
+            transform: translateX(-280px) !important;
+            transition: none !important;
+        }
+        html.sidebar-is-collapsed #mainContent {
+            margin-left: 0 !important;
+            width: 100% !important;
+            transition: none !important;
+        }
+
+        /* Mobile overlay */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(2px);
+            z-index: 1040;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .sidebar-overlay.show {
+            display: block;
+            opacity: 1;
+        }
+
+        @media (max-width: 991.98px) {
+            #adminSidebar {
+                transform: translateX(-280px);
+            }
+            #adminSidebar.mobile-show {
+                transform: translateX(0) !important;
+            }
+            #mainContent {
+                margin-left: 0 !important;
+                width: 100% !important;
+            }
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+            #adminSidebar, .sidebar-overlay { display: none !important; }
+            #mainContent { margin-left: 0 !important; width: 100% !important; padding: 0 !important; }
+        }
     </style>
 </head>
 <body>
 
+<!-- Mobile Sidebar Backdrop Overlay -->
+<div id="sidebarOverlay" class="sidebar-overlay no-print"></div>
+
 <div class="d-flex" style="min-height: 100vh;">
     <!-- Sidebar -->
-    <div class="sidebar-bg text-white py-3 d-flex flex-column" style="width: 280px; position: fixed; height: 100vh; overflow-y: auto; box-shadow: 4px 0 10px rgba(0,0,0,0.1); z-index: 1000;">
-        <div class="text-center mb-4 mt-2 px-3 pb-3">
-            <h4 class="fw-bold mb-0 tracking-wider">ADMIN PANEL</h4>
-            <small class="text-white-50">Sistem Kuisioner Dosen</small>
+    <div id="adminSidebar" class="sidebar-bg text-white py-3 d-flex flex-column no-print">
+        <div class="d-flex align-items-center justify-content-between px-3 mb-4 mt-2 pb-2 border-bottom border-white-50 border-opacity-10">
+            <div>
+                <h4 class="fw-bold mb-0 tracking-wider">ADMIN PANEL</h4>
+                <small class="text-white-50">Sistem Kuisioner Dosen</small>
+            </div>
+            <button id="sidebarCollapseBtn" class="btn btn-sm text-white-50 p-1 border-0" type="button" title="Sembunyikan Menu">
+                <i class="bi bi-chevron-left fs-5"></i>
+            </button>
         </div>
         
         <div class="px-3 mb-2 text-white-50 small fw-bold text-uppercase" style="font-size: 0.75rem; letter-spacing: 1px;">Menu Utama</div>
@@ -81,9 +175,17 @@
     </div>
 
     <!-- Main Content -->
-    <div class="flex-grow-1 bg-light p-4" style="margin-left: 280px; min-height: 100vh;">
+    <div id="mainContent" class="flex-grow-1 bg-light p-4 content-area">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-bold text-dark mb-0">Data Dosen dan Mata Kuliah</h2>
+            <div class="d-flex align-items-center gap-3">
+                <button id="sidebarToggle" class="btn btn-white bg-white border shadow-sm text-secondary d-inline-flex align-items-center justify-content-center" style="width: 42px; height: 42px; border-radius: 10px;" type="button" title="Sembunyikan/Tampilkan Menu">
+                    <i class="bi bi-list fs-4"></i>
+                </button>
+                <div>
+                    <h2 class="fw-bold text-dark mb-0">Data Dosen dan Mata Kuliah</h2>
+                    <small class="text-muted">Kelola jadwal perkuliahan dan kelas evaluasi</small>
+                </div>
+            </div>
             <div class="d-flex gap-2">
                 <a href="{{ route('admin.laporan.cetak-tabel', ['periode' => request('periode'), 'prodi_id' => request('prodi_id')]) }}" target="_blank" class="btn btn-primary shadow-sm fw-bold">
                     <i class="bi bi-printer-fill me-2"></i> Cetak Daftar Evaluasi
@@ -199,6 +301,59 @@
 
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const body = document.body;
+        const toggleBtn = document.getElementById('sidebarToggle');
+        const collapseBtn = document.getElementById('sidebarCollapseBtn');
+        const overlay = document.getElementById('sidebarOverlay');
+        const sidebar = document.getElementById('adminSidebar');
+
+        if (window.innerWidth >= 992) {
+            if (localStorage.getItem('sidebar_collapsed') === 'true') {
+                body.classList.add('sidebar-collapsed');
+            } else {
+                body.classList.remove('sidebar-collapsed');
+            }
+        }
+        document.documentElement.classList.remove('sidebar-is-collapsed');
+
+        function toggleSidebar() {
+            if (window.innerWidth >= 992) {
+                body.classList.toggle('sidebar-collapsed');
+                const isCollapsed = body.classList.contains('sidebar-collapsed');
+                localStorage.setItem('sidebar_collapsed', isCollapsed ? 'true' : 'false');
+            } else {
+                if (sidebar) {
+                    const isShown = sidebar.classList.toggle('mobile-show');
+                    if (overlay) {
+                        overlay.classList.toggle('show', isShown);
+                    }
+                }
+            }
+        }
+
+        function closeSidebar() {
+            if (window.innerWidth >= 992) {
+                body.classList.add('sidebar-collapsed');
+                localStorage.setItem('sidebar_collapsed', 'true');
+            } else {
+                if (sidebar) sidebar.classList.remove('mobile-show');
+                if (overlay) overlay.classList.remove('show');
+            }
+        }
+
+        if (toggleBtn) toggleBtn.addEventListener('click', toggleSidebar);
+        if (collapseBtn) collapseBtn.addEventListener('click', closeSidebar);
+        if (overlay) {
+            overlay.addEventListener('click', function() {
+                if (sidebar) sidebar.classList.remove('mobile-show');
+                overlay.classList.remove('show');
+            });
+        }
+    });
+</script>
 
 <!-- Modal Setting Periode -->
 <div class="modal fade" id="periodeModal" tabindex="-1">

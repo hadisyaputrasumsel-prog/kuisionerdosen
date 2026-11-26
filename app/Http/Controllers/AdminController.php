@@ -790,6 +790,7 @@ class AdminController extends Controller
             'chartPredikat',
             'totalResponden',
             'totalDosen',
+            'totalJadwal',
             'totalMatkul',
             'avgScoreA',
             'avgScoreB',

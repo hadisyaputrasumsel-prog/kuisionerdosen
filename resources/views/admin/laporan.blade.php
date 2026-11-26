@@ -255,7 +255,7 @@
                                     </div>
                                     <div>
                                         <div class="text-muted small fw-semibold text-uppercase">Total Responden</div>
-                                        <div class="fs-4 fw-bold text-dark">{{ number_format($totalResponden) }}</div>
+                                        <div class="fs-4 fw-bold text-dark">{{ number_format($totalResponden ?? 0) }}</div>
                                         <small class="text-muted">Respon Mahasiswa</small>
                                     </div>
                                 </div>
@@ -269,7 +269,7 @@
                                     </div>
                                     <div>
                                         <div class="text-muted small fw-semibold text-uppercase">Dosen Dievaluasi</div>
-                                        <div class="fs-4 fw-bold text-dark">{{ number_format($totalDosen) }} Dosen</div>
+                                        <div class="fs-4 fw-bold text-dark">{{ number_format($totalDosen ?? 0) }} Dosen</div>
                                         <small class="text-muted">Objek Evaluasi</small>
                                     </div>
                                 </div>
@@ -283,8 +283,8 @@
                                     </div>
                                     <div>
                                         <div class="text-muted small fw-semibold text-uppercase">Kelas Perkuliahan</div>
-                                        <div class="fs-4 fw-bold text-dark">{{ number_format($totalJadwal) }} Kelas</div>
-                                        <small class="text-muted">{{ number_format($totalMatkul) }} Mata Kuliah</small>
+                                        <div class="fs-4 fw-bold text-dark">{{ number_format($totalJadwal ?? ($jadwals ? $jadwals->count() : 0)) }} Kelas</div>
+                                        <small class="text-muted">{{ number_format($totalMatkul ?? 0) }} Mata Kuliah</small>
                                     </div>
                                 </div>
                             </div>
@@ -297,9 +297,9 @@
                                     </div>
                                     <div>
                                         <div class="text-muted small fw-semibold text-uppercase">Rata-Rata Kinerja</div>
-                                        <div class="fs-4 fw-bold text-dark">{{ number_format($avgScoreTotal, 2) }}</div>
-                                        <span class="badge bg-{{ $overallPredikat === 'Sangat Baik' ? 'success' : ($overallPredikat === 'Baik' ? 'primary' : ($overallPredikat === 'Sedang' ? 'warning text-dark' : 'danger')) }}">
-                                            {{ $overallPredikat }}
+                                        <div class="fs-4 fw-bold text-dark">{{ number_format($avgScoreTotal ?? 0, 2) }}</div>
+                                        <span class="badge bg-{{ ($overallPredikat ?? '') === 'Sangat Baik' ? 'success' : (($overallPredikat ?? '') === 'Baik' ? 'primary' : (($overallPredikat ?? '') === 'Sedang' ? 'warning text-dark' : 'danger')) }}">
+                                            {{ $overallPredikat ?? 'Sangat Baik' }}
                                         </span>
                                     </div>
                                 </div>
@@ -375,15 +375,15 @@
                                     <div class="mt-3 p-3 bg-light rounded-3">
                                         <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
                                             <span class="fw-semibold text-dark"><i class="bi bi-check2-circle text-primary me-2"></i>Proses Belajar Mengajar (PBM)</span>
-                                            <span class="badge bg-primary fs-6">{{ number_format($avgScoreA, 2) }}</span>
+                                            <span class="badge bg-primary fs-6">{{ number_format($avgScoreA ?? 0, 2) }}</span>
                                         </div>
                                         <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
                                             <span class="fw-semibold text-dark"><i class="bi bi-check2-circle text-success me-2"></i>Kapabilitas & Kompetensi Dosen (KKD)</span>
-                                            <span class="badge bg-success fs-6">{{ number_format($avgScoreB, 2) }}</span>
+                                            <span class="badge bg-success fs-6">{{ number_format($avgScoreB ?? 0, 2) }}</span>
                                         </div>
                                         <div class="d-flex justify-content-between align-items-center">
                                             <span class="fw-semibold text-dark"><i class="bi bi-check2-circle text-purple me-2" style="color: #6f42c1;"></i>Ketersediaan Sarana Prasarana (KSP)</span>
-                                            <span class="badge bg-secondary fs-6" style="background-color: #6f42c1 !important;">{{ number_format($avgScoreC, 2) }}</span>
+                                            <span class="badge bg-secondary fs-6" style="background-color: #6f42c1 !important;">{{ number_format($avgScoreC ?? 0, 2) }}</span>
                                         </div>
                                     </div>
                                 </div>

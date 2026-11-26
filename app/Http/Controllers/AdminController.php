@@ -658,6 +658,123 @@ class AdminController extends Controller
             $defaultTotalDosen
         );
 
+        // Data untuk Tab Preview Hasil Evaluasi (Grafik)
+        $questions = \App\Models\Question::where('is_active', true)->orderBy('section')->orderBy('order_num')->get();
+        $groupedQuestions = $questions->groupBy('section');
+
+        $chartPredikat = [
+            'Sangat Baik' => 0,
+            'Baik' => 0,
+            'Sedang' => 0,
+            'Buruk' => 0,
+            'Sangat Buruk' => 0,
+        ];
+        foreach ($jadwals as $j) {
+            if (isset($chartPredikat[$j->predikat])) {
+                $chartPredikat[$j->predikat]++;
+            }
+        }
+
+        $totalResponden = $defaultTotalResponden;
+        $totalDosen = $defaultTotalDosen;
+        $totalJadwal = $jadwals->count();
+        $totalMatkul = $jadwals->unique('mata_kuliah_id')->count();
+
+        $sumAvgA = 0; $sumAvgB = 0; $sumAvgC = 0; $sumTotal = 0;
+        foreach ($jadwals as $j) {
+            $sumAvgA += $j->avg_A;
+            $sumAvgB += $j->avg_B;
+            $sumAvgC += $j->avg_C;
+            $sumTotal += $j->average_score;
+        }
+        $avgScoreA = $totalJadwal > 0 ? round($sumAvgA / $totalJadwal, 2) : 0;
+        $avgScoreB = $totalJadwal > 0 ? round($sumAvgB / $totalJadwal, 2) : 0;
+        $avgScoreC = $totalJadwal > 0 ? round($sumAvgC / $totalJadwal, 2) : 0;
+        $avgScoreTotal = $totalJadwal > 0 ? round($sumTotal / $totalJadwal, 2) : 0;
+
+        $overallPredikat = 'Sangat Kurang';
+        if ($avgScoreTotal >= 71.2) $overallPredikat = 'Sangat Baik';
+        elseif ($avgScoreTotal >= 58.1) $overallPredikat = 'Baik';
+        elseif ($avgScoreTotal >= 44.4) $overallPredikat = 'Sedang';
+        elseif ($avgScoreTotal >= 30.7) $overallPredikat = 'Buruk';
+
+        // Proporsi responden
+        $isUniv = empty($request->prodi_id);
+        $pieStats = [];
+        if ($isUniv) {
+            foreach ($jadwals as $j) {
+                $pName = $j->prodi->name ?? 'Unknown';
+                $pieStats[$pName] = ($pieStats[$pName] ?? 0) + $j->evaluations->count();
+            }
+        } else {
+            foreach ($jadwals as $j) {
+                $dName = $j->dosen->name ?? 'Unknown';
+                $pieStats[$dName] = ($pieStats[$dName] ?? 0) + $j->evaluations->count();
+            }
+        }
+        arsort($pieStats);
+        if (count($pieStats) > 10) {
+            $top10 = array_slice($pieStats, 0, 10);
+            $others = array_slice($pieStats, 10);
+            $labelOthers = $isUniv ? 'Prodi Lainnya (' . count($others) . ' Prodi)' : 'Dosen Lainnya (' . count($others) . ' Dosen)';
+            $top10[$labelOthers] = array_sum($others);
+            $pieStats = $top10;
+        }
+        $pieLabels = array_keys($pieStats);
+        $pieData = array_values($pieStats);
+        $pieTitle = $isUniv ? 'Proporsi Responden per Program Studi' : 'Proporsi Responden per Dosen';
+
+        // Tallies per pertanyaan (1 - 5) dan skor rata-rata per pertanyaan
+        $questionTallies = [];
+        $questionAvgScores = [];
+        foreach ($questions as $q) {
+            $questionTallies[$q->id] = [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0];
+        }
+        foreach ($jadwals as $j) {
+            foreach ($j->evaluations as $eval) {
+                $answers = is_string($eval->answers) ? json_decode($eval->answers, true) : $eval->answers;
+                if (is_array($answers)) {
+                    foreach ($answers as $qKey => $score) {
+                        $qId = (int) str_replace('q_', '', $qKey);
+                        $intScore = (int) $score;
+                        if (isset($questionTallies[$qId][$intScore])) {
+                            $questionTallies[$qId][$intScore]++;
+                        }
+                    }
+                }
+            }
+        }
+        foreach ($questions as $q) {
+            $t = $questionTallies[$q->id] ?? [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0];
+            $tTotal = array_sum($t);
+            $tSum = ($t[1] * 1) + ($t[2] * 2) + ($t[3] * 3) + ($t[4] * 4) + ($t[5] * 5);
+            $questionAvgScores[$q->id] = $tTotal > 0 ? round($tSum / $tTotal, 2) : 0;
+        }
+
+        // Top 10 Dosen
+        $dosenScores = [];
+        foreach ($jadwals as $j) {
+            $dId = $j->dosen_id;
+            if (!isset($dosenScores[$dId])) {
+                $dosenScores[$dId] = [
+                    'name' => $j->dosen->name ?? 'N/A',
+                    'prodi' => $j->prodi->name ?? 'N/A',
+                    'total_score' => 0,
+                    'count' => 0,
+                    'respondents' => 0,
+                ];
+            }
+            $dosenScores[$dId]['total_score'] += $j->average_score;
+            $dosenScores[$dId]['count']++;
+            $dosenScores[$dId]['respondents'] += $j->evaluations->count();
+        }
+        foreach ($dosenScores as &$ds) {
+            $ds['avg'] = $ds['count'] > 0 ? round($ds['total_score'] / $ds['count'], 2) : 0;
+        }
+        unset($ds);
+        uasort($dosenScores, fn($a, $b) => $b['avg'] <=> $a['avg']);
+        $topDosen = array_slice($dosenScores, 0, 10);
+
         return view('admin.laporan', compact(
             'jadwals',
             'filterPeriodes',
@@ -667,7 +784,24 @@ class AdminController extends Controller
             'semester',
             'coverYear',
             'activePeriodeFormatted',
-            'activeProdiName'
+            'activeProdiName',
+            'questions',
+            'groupedQuestions',
+            'chartPredikat',
+            'totalResponden',
+            'totalDosen',
+            'totalMatkul',
+            'avgScoreA',
+            'avgScoreB',
+            'avgScoreC',
+            'avgScoreTotal',
+            'overallPredikat',
+            'pieLabels',
+            'pieData',
+            'pieTitle',
+            'questionTallies',
+            'questionAvgScores',
+            'topDosen'
         ));
     }
 

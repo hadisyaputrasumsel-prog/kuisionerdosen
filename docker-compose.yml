@@ -4,7 +4,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: kuisionerdosen-app
+    image: kuisionerdosen-app:v2
+    container_name: kuisionerdosen_app
+    restart: unless-stopped
     ports:
       - "8086:80"
     environment:
@@ -29,6 +31,8 @@ services:
 
   db:
     image: mariadb:10.6
+    container_name: kuisionerdosen_db
+    restart: unless-stopped
     environment:
       - MYSQL_ROOT_PASSWORD=root_password
       - MYSQL_DATABASE=kuisioner_dosen

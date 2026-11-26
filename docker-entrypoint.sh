@@ -1,36 +1,55 @@
 #!/bin/bash
-echo "Starting entrypoint..."
+# Remove leftover Apache PID to avoid crash on container restart
+rm -f /var/run/apache2/apache2.pid
 
-# Jalankan package discover terlebih dahulu
+# Ensure storage and upload directories exist
+mkdir -p /var/www/html/public/uploads \
+         /var/www/html/storage/app/public \
+         /var/www/html/storage/app/private \
+         /var/www/html/storage/framework/cache/data \
+         /var/www/html/storage/framework/sessions \
+         /var/www/html/storage/framework/views \
+         /var/www/html/storage/logs
+
+# Run package discover
 echo "Menjalankan package:discover..."
-php artisan package:discover --ansi
+php artisan package:discover --ansi || true
 
-# Tunggu database mysql siap
+# Ensure storage symlink exists
+php artisan storage:link --force || true
+
+# Wait for database
 echo "Menunggu MySQL..."
-while ! php artisan db:show; do
-  echo "Menunggu koneksi database..."
-  sleep 2
+max_tries=30
+count=0
+db_ready=0
+while [ $count -lt $max_tries ]; do
+    if php -r "try { new PDO('mysql:host=' . getenv('DB_HOST') . ';port=' . (getenv('DB_PORT') ?: 3306) . ';dbname=' . getenv('DB_DATABASE'), getenv('DB_USERNAME'), getenv('DB_PASSWORD')); exit(0); } catch (Throwable \$e) { exit(1); }"; then
+        echo "Database siap!"
+        db_ready=1
+        break
+    fi
+    count=$((count + 1))
+    echo "Menunggu koneksi database ($count/$max_tries)..."
+    sleep 2
 done
 
-# Jalankan migrasi dan seeder jika belum ada
-echo "Menjalankan migrasi database..."
-php artisan migrate --force
+if [ $db_ready -eq 1 ]; then
+    echo "Menjalankan migrasi database..."
+    php artisan migrate --force || true
 
-# Seed database dengan master data (hanya jalan jika tabel prodis kosong, atau kita bisa force dengan logika tertentu)
-# Kita jalankan artisan db:seed tapi pastikan seeder idempotent atau kita abaikan jika sudah ada.
-# Untuk demo, ini akan populate. Jika database persisten, hati-hati duplikasi seeder.
-php artisan db:seed --force || true
+    echo "Menjalankan seeder..."
+    php artisan db:seed --force || true
+else
+    echo "WARNING: Database belum siap setelah $max_tries percobaan. Melanjutkan startup Apache..."
+fi
 
-# Jalankan cache config dsb
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
+# Clear cache agar aplikasi berjalan bersih
+php artisan optimize:clear || true
 
-# Pastikan folder public/uploads ada
-mkdir -p /var/www/html/public/uploads
+# Pastikan kepemilikan file oleh user web server www-data
+chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/public/uploads || true
+chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/public/uploads || true
 
-# Perbaiki izin setelah artisan command membuat file cache/log
-chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/public/uploads
-
-# Jalankan perintah utama (CMD)
+echo "Memulai Apache..."
 exec "$@"
